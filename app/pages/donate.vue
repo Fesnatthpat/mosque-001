@@ -1,139 +1,171 @@
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+const supabase = useSupabaseClient()
+const { data: settings } = await useFetch('/api/admin/settings')
 
-// ตั้งค่า Title ของหน้า
-useHead({
-    title: 'ร่วมบริจาค - มัสยิดดารุสสลาม'
+const pageData = computed(() => settings.value?.page_donate || {
+    title: 'ร่วมบริจาคสมทบทุน',
+    description: 'การบริจาคของคุณจะถูกนำไปใช้เพื่อทำนุบำรุงมัสยิดและช่วยเหลือผู้ยากไร้ในชุมชน',
+    qr_image: '/images/qr.png'
 })
 
-// ตัวแปรสำหรับแสดงข้อความ "คัดลอกแล้ว"
-const copied = ref(false)
+// ฟอร์มบริจาค
+const form = ref({
+    amount: '',
+    donorName: '',
+    blessing: '',
+    slipUrl: ''
+})
 
-// ฟังก์ชันสำหรับคัดลอกเลขบัญชี
-const copyAccountNumber = async () => {
+const isUploading = ref(false)
+const isSubmitting = ref(false)
+const localSlipPreview = ref('')
+
+async function handleSlipUpload(event: any) {
+    const file = event.target.files[0]
+    if (!file) return
+
+    isUploading.value = true
+    localSlipPreview.value = URL.createObjectURL(file)
+
+    const fileExt = file.name.split('.').pop()
+    const fileName = `slip_${Date.now()}.${fileExt}`
+    const filePath = `slips/${fileName}`
+
     try {
-        await navigator.clipboard.writeText('123-1-23456-7')
-        copied.value = true
-        // ซ่อนข้อความคัดลอกแล้วหลังจากผ่านไป 3 วินาที
-        setTimeout(() => {
-            copied.value = false
-        }, 3000)
-    } catch (err) {
-        console.error('Failed to copy text: ', err)
+        const { error: uploadError } = await supabase.storage
+            .from('images')
+            .upload(filePath, file)
+
+        if (uploadError) throw uploadError
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('images')
+            .getPublicUrl(filePath)
+
+        form.value.slipUrl = publicUrl
+    } catch (error: any) {
+        alert('อัปโหลดสลิปล้มเหลว: ' + error.message)
+    } finally {
+        isUploading.value = false
     }
 }
 
-// ฟังก์ชันเมื่อกดส่งฟอร์ม (คุณสามารถนำไปต่อยอดส่งเข้า API ทีหลังได้)
-const submitDonation = () => {
-    alert('ขอบคุณสำหรับการบริจาค ข้อมูลของคุณถูกส่งเรียบร้อยแล้ว')
+async function submitDonation() {
+    if (!form.value.amount || !form.value.slipUrl) {
+        alert('กรุณากรอกจำนวนเงินและแนบสลิปการโอนเงินครับ')
+        return
+    }
+
+    isSubmitting.value = true
+    try {
+        await $fetch('/api/donate', {
+            method: 'POST',
+            body: form.value
+        })
+        alert('ส่งข้อมูลการบริจาคเรียบร้อยแล้ว! ขออัลลอฮ์ทรงตอบแทนความดีท่าน 🎉')
+        // Reset form
+        form.value = { amount: '', donorName: '', blessing: '', slipUrl: '' }
+        localSlipPreview.value = ''
+    } catch (error: any) {
+        alert('เกิดข้อผิดพลาด: ' + error.message)
+    } finally {
+        isSubmitting.value = false
+    }
 }
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 pt-28 pb-20">
-        <div class="max-w-5xl mx-auto px-6">
-
+    <div class="min-h-screen bg-gray-50 pt-28 pb-16 font-['Prompt']">
+        <div class="max-w-6xl mx-auto px-6">
             <div class="text-center mb-12">
-                <h1 class="text-3xl md:text-4xl font-bold text-[#155d3a] tracking-tight mb-4">ร่วมบริจาคและสนับสนุน</h1>
-                <p class="text-gray-500 text-lg">
-                    "การบริจาคไม่ได้ทำให้ทรัพย์สินลดน้อยลง" ร่วมเป็นส่วนหนึ่งในการบำรุงรักษาและดำเนินกิจกรรมของมัสยิด
-                </p>
+                <h1 class="text-4xl md:text-5xl font-black text-[#155d3a] mb-4 uppercase">{{ pageData.title }}</h1>
+                <div class="w-20 h-1.5 bg-[#facc15] mx-auto rounded-full shadow-sm"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                
+                <!-- ฝั่งซ้าย: ข้อมูลการโอน (QR Code) -->
+                <div class="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-slate-100 p-8 md:p-12 text-center sticky top-28">
+                    <p class="text-slate-600 text-lg mb-8 leading-relaxed">
+                        {{ pageData.description }}
+                    </p>
 
-                <div class="md:col-span-5">
-                    <div
-                        class="bg-white rounded-2xl shadow-sm border border-gray-100 border-t-4 border-t-[#d6a848] p-8 flex flex-col items-center">
+                    <div class="mb-8 inline-block p-6 bg-emerald-50 rounded-[2.5rem] border-2 border-dashed border-emerald-200">
+                        <img :src="pageData.qr_image" alt="QR Code สำหรับบริจาค"
+                            class="w-64 h-64 md:w-80 md:h-80 object-contain mx-auto rounded-2xl shadow-sm">
+                    </div>
 
-                        <h2 class="text-lg font-bold text-gray-800 mb-1">สแกนเพื่อบริจาค</h2>
-                        <p class="text-gray-500 text-sm mb-6">พร้อมเพย์ (PromptPay)</p>
-
-                        <div class="border border-dashed border-gray-300 p-4 rounded-xl mb-6 bg-white">
-                            <img src="/images/qr.png" alt="QR Code พร้อมเพย์" class="w-48 h-48 object-contain">
-                        </div>
-
-                        <div class="bg-[#f4f7f6] w-full rounded-xl p-5 text-sm text-gray-700 space-y-2">
-                            <div class="flex justify-between">
-                                <span class="font-bold">ชื่อบัญชี:</span>
-                                <span>มัสยิดดารุสสลาม</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold">เลขที่บัญชี:</span>
-                                <div class="flex items-center gap-2">
-                                    <span id="account-number">123-1-23456-7</span>
-                                    <button @click="copyAccountNumber"
-                                        class="text-[#155d3a] hover:text-[#d6a848] transition-colors"
-                                        title="คัดลอกเลขบัญชี">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="font-bold">ธนาคาร:</span>
-                                <span>อิสลามแห่งประเทศไทย</span>
+                    <div class="space-y-4 max-w-sm mx-auto">
+                        <div class="bg-slate-900 p-5 rounded-2xl flex items-center justify-center gap-4 shadow-lg">
+                            <span class="text-3xl">🏦</span>
+                            <div class="text-left">
+                                <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">ชื่อบัญชี</p>
+                                <p class="font-bold text-white text-lg leading-tight">มัสยิดบ้านสมเด็จ (เพื่อการกุศล)</p>
                             </div>
                         </div>
-
-                        <p v-if="copied" class="text-green-600 text-xs mt-3 font-semibold">คัดลอกเลขบัญชีแล้ว!</p>
-
                     </div>
                 </div>
 
-                <div class="md:col-span-7">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10">
+                <!-- ฝั่งขวา: ฟอร์มกรอกข้อมูลและแนบสลิป -->
+                <div class="bg-white rounded-[3rem] shadow-xl border border-slate-100 p-8 md:p-12">
+                    <h2 class="text-2xl font-black text-slate-800 mb-8 flex items-center gap-3">
+                        <span class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">📝</span>
+                        แจ้งข้อมูลการโอนเงิน
+                    </h2>
 
-                        <div class="flex items-center gap-3 mb-8">
-                            <div class="w-1.5 h-6 bg-[#155d3a] rounded-full"></div>
-                            <h2 class="text-xl font-bold text-gray-800">แจ้งข้อมูลการบริจาค</h2>
+                    <form @submit.prevent="submitDonation" class="space-y-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ชื่อผู้บริจาค</label>
+                                <input v-model="form.donorName" type="text" placeholder="ระบุชื่อ (หรือไม่ระบุก็ได้)" class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500/20 outline-none font-bold" />
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">จำนวนเงิน (บาท) *</label>
+                                <input v-model="form.amount" type="number" step="0.01" required placeholder="ระบุจำนวนเงิน..." class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500/20 outline-none font-bold text-emerald-600 text-xl" />
+                            </div>
                         </div>
 
-                        <form @submit.prevent="submitDonation" class="space-y-5">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">คำอวยพร / ข้อความ</label>
+                            <textarea v-model="form.blessing" rows="3" placeholder="ข้อความถึงมัสยิด..." class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500/20 outline-none font-medium"></textarea>
+                        </div>
 
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อ - นามสกุล (หรือ
-                                    "ไม่ประสงค์ออกนาม")</label>
-                                <input type="text" placeholder="ระบุชื่อของคุณ"
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#155d3a]/30 focus:border-[#155d3a] transition-colors">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">จำนวนเงินบริจาค
-                                    (บาท)</label>
-                                <input type="number" placeholder="0.00"
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#155d3a]/30 focus:border-[#155d3a] transition-colors">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">คำอธิษฐาน /
-                                    ข้อความเพิ่มเติม</label>
-                                <textarea rows="3" placeholder="ขอพระองค์ตอบแทนความดีงาม..."
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#155d3a]/30 focus:border-[#155d3a] transition-colors resize-none"></textarea>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">แนบหลักฐานการโอนเงิน
-                                    (สลิป)</label>
-                                <div
-                                    class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition-colors">
-                                    <input type="file" accept="image/png, image/jpeg"
-                                        class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer">
-                                    <p class="text-xs text-gray-400 mt-3">รองรับไฟล์รูปภาพ JPG, PNG</p>
+                        <div class="space-y-4">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">แนบรูปภาพสลิป *</label>
+                            <div class="relative group">
+                                <div v-if="localSlipPreview" class="relative w-full h-64 rounded-[2rem] overflow-hidden border-4 border-white shadow-md mb-4 bg-slate-100">
+                                    <img :src="localSlipPreview" class="w-full h-full object-contain" />
+                                    <div v-if="isUploading" class="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
+                                        <div class="flex flex-col items-center gap-3">
+                                            <div class="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            <span class="text-white text-xs font-bold uppercase tracking-widest">กำลังอัปโหลด...</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="localSlipPreview = ''; form.slipUrl = ''" class="absolute top-4 right-4 w-10 h-10 bg-white/80 backdrop-blur text-rose-500 rounded-full shadow-lg flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all">✕</button>
                                 </div>
+                                <label v-else class="flex flex-col items-center justify-center w-full h-64 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] cursor-pointer hover:bg-slate-100 transition-all group">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <span class="text-4xl mb-4 group-hover:scale-110 transition-transform">📸</span>
+                                        <p class="mb-2 text-sm text-slate-500 font-bold uppercase tracking-widest">คลิกเพื่อแนบรูปสลิป</p>
+                                        <p class="text-[10px] text-slate-400">JPG, PNG หรือ PDF</p>
+                                    </div>
+                                    <input type="file" @change="handleSlipUpload" class="hidden" accept="image/*" />
+                                </label>
                             </div>
+                        </div>
 
-                            <button type="submit"
-                                class="w-full py-3.5 bg-[#d6a848] hover:bg-[#c2963d] text-white font-bold rounded-lg shadow-md transition-colors mt-4">
-                                ส่งข้อมูลการบริจาค
-                            </button>
-
-                        </form>
-
-                    </div>
+                        <button 
+                            type="submit" 
+                            :disabled="isSubmitting || isUploading"
+                            class="w-full py-5 bg-emerald-500 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 hover:bg-emerald-600 transition-all active:scale-95 disabled:opacity-50 uppercase tracking-widest text-lg"
+                        >
+                            <span v-if="isSubmitting" class="flex items-center justify-center gap-3">
+                                <div class="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                กำลังส่งข้อมูล...
+                            </span>
+                            <span v-else>ยืนยันการบริจาค ✨</span>
+                        </button>
+                    </form>
                 </div>
 
             </div>

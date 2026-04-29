@@ -12,8 +12,15 @@ export default defineNuxtConfig({
   
   // เพิ่ม Modules ของ Google Fonts เข้ามา
   modules: [
-    '@nuxtjs/google-fonts'
+    '@nuxtjs/google-fonts',
+    '@nuxtjs/supabase'
   ],
+
+  supabase: {
+    redirect: false,
+    url: process.env.SUPABASE_URL,
+    key: process.env.SUPABASE_KEY
+  },
   
   // ตั้งค่าให้ดึงฟอนต์ Prompt มาใช้งาน
   googleFonts: {

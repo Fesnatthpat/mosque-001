@@ -1,31 +1,35 @@
 <script setup lang="ts">
-// ไม่จำเป็นต้องมีตัวแปรเพิ่มเติมสำหรับ Footer ที่เป็นข้อมูลคงที่ครับ
+const { data: settings } = await useFetch('/api/admin/settings')
+
+// Footer จะใช้ข้อมูลจาก "ข้อมูลทั่วไป" เป็นหลัก
+const footerMosqueName = computed(() => settings.value?.mosque_name || 'มัสยิดบ้านสมเด็จ')
+const footerDesc = computed(() => settings.value?.footer_desc || 'ออกแบบและพัฒนาเพื่อชุมชน')
+const footerLogo = computed(() => settings.value?.logo_url || '')
 </script>
 
 <template>
-    <footer class="bg-[#104b2e] text-white pt-14 pb-6 mt-auto border-t-[6px] border-[#d6a848]">
-        <div class="max-w-7xl mx-auto px-6">
+    <footer class="bg-[#104b2e] text-white pt-14 pb-6 mt-auto border-t-[6px] border-[#d6a848] font-['Prompt']">
+        <div class="max-w-7xl mx-auto px-6 md:px-10">
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 mb-10">
-
-                <div>
-                    <div class="text-2xl font-bold mb-4 flex items-center gap-2 text-white">
-                        🕌 มัสยิดบ้านสมเด็จ
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <!-- ส่วนโลโก้และคำอธิบาย -->
+                <div class="space-y-5">
+                    <div class="flex items-center gap-3">
+                        <div v-if="footerLogo" class="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2 shadow-inner">
+                            <img :src="footerLogo" alt="Footer Logo" class="w-full h-full object-contain">
+                        </div>
+                        <span v-else class="text-3xl">🕌</span>
+                        <h2 class="text-2xl font-bold tracking-tight">{{ footerMosqueName }}</h2>
                     </div>
-                    <p class="text-gray-300 leading-relaxed text-sm pr-4">
-                        ศูนย์รวมจิตใจ สันติสุข และความร่มเย็นของชุมชน เรายินดีต้อนรับทุกท่านด้วยความอบอุ่นและมิตรภาพ
+                    <p class="text-gray-300 leading-relaxed text-sm">
+                        {{ footerDesc }}
                     </p>
                 </div>
 
+                <!-- ส่วนลิงก์ด่วน -->
                 <div>
-                    <h3 class="text-lg font-semibold mb-5 text-white border-b-2 border-[#155d3a] pb-2 inline-block">
-                        ลิงก์ด่วน</h3>
-                    <ul class="space-y-3 text-gray-300 text-sm">
-                        <li>
-                            <NuxtLink to="/" class="hover:text-[#facc15] transition-colors flex items-center gap-2">
-                                <span class="text-[#d6a848] text-xs">▶</span> หน้าแรก
-                            </NuxtLink>
-                        </li>
+                    <h3 class="text-[#facc15] font-bold text-lg mb-6 border-l-4 border-[#facc15] pl-3">เมนูแนะนำ</h3>
+                    <ul class="space-y-3">
                         <li>
                             <NuxtLink to="/history"
                                 class="hover:text-[#facc15] transition-colors flex items-center gap-2">
@@ -33,15 +37,9 @@
                             </NuxtLink>
                         </li>
                         <li>
-                            <NuxtLink to="/timetable"
-                                class="hover:text-[#facc15] transition-colors flex items-center gap-2">
-                                <span class="text-[#d6a848] text-xs">▶</span> ตารางเวลาละหมาด
-                            </NuxtLink>
-                        </li>
-                        <li>
                             <NuxtLink to="/activities"
                                 class="hover:text-[#facc15] transition-colors flex items-center gap-2">
-                                <span class="text-[#d6a848] text-xs">▶</span> กิจกรรม
+                                <span class="text-[#d6a848] text-xs">▶</span> กิจกรรมมัสยิด
                             </NuxtLink>
                         </li>
                         <li>
@@ -53,39 +51,34 @@
                     </ul>
                 </div>
 
+                <!-- ส่วนช่องทางติดต่อ -->
                 <div>
-                    <h3 class="text-lg font-semibold mb-5 text-white border-b-2 border-[#155d3a] pb-2 inline-block">
-                        ข้อมูลติดต่อ</h3>
-                    <ul class="space-y-4 text-gray-300 text-sm">
+                    <h3 class="text-[#facc15] font-bold text-lg mb-6 border-l-4 border-[#facc15] pl-3">การติดต่อ</h3>
+                    <ul class="space-y-4 text-sm text-gray-300">
                         <li class="flex items-start gap-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#d6a848] shrink-0 mt-0.5"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span>แขวงสมเด็จเจ้าพระยา เขตคลองสาน<br>กรุงเทพมหานคร 10600</span>
+                            <span class="text-[#facc15]">📍</span>
+                            <span>{{ settings?.address || 'แขวงสมเด็จเจ้าพระยา เขตคลองสาน กรุงเทพมหานคร' }}</span>
                         </li>
                         <li class="flex items-center gap-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#d6a848] shrink-0" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                            </svg>
-                            <span>02-XXX-XXXX</span>
+                            <span class="text-[#facc15]">📞</span>
+                            <span>{{ settings?.phone || '02-XXX-XXXX' }}</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="text-[#facc15]">✉️</span>
+                            <span>{{ settings?.email || 'contact@mosque.com' }}</span>
                         </li>
                     </ul>
                 </div>
-
             </div>
 
-            <div class="w-full h-px bg-[#1a6e45] mb-6"></div>
-
-            <div
-                class="text-center md:flex md:justify-between md:items-center text-gray-400 text-xs space-y-2 md:space-y-0">
-                <p>&copy; 2026 มัสยิดบ้านสมเด็จ. สงวนลิขสิทธิ์.</p>
-                <p>ออกแบบและพัฒนาเพื่อชุมชน</p>
+            <!-- ส่วนลิขสิทธิ์ล่างสุด -->
+            <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-gray-400 text-xs space-y-4 md:space-y-0">
+                <p>&copy; 2026 {{ footerMosqueName }}. สงวนลิขสิทธิ์.</p>
+                <div class="flex gap-6">
+                    <NuxtLink to="/admin" class="hover:text-[#facc15] opacity-50 hover:opacity-100 transition-all font-bold">
+                        🔐 ระบบหลังบ้าน
+                    </NuxtLink>
+                </div>
             </div>
 
         </div>
