@@ -41,10 +41,10 @@ const formattedAmount = computed(() => {
                     </div>
                 </div>
 
-                <a href="#about"
+                <!-- <a href="#about"
                     class="inline-block px-10 py-3.5 bg-green-700 hover:bg-green-600 text-white font-bold rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1">
                     เรียนรู้เพิ่มเติม
-                </a>
+                </a> -->
             </div>
         </header>
 

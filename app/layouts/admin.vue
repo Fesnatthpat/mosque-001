@@ -78,7 +78,7 @@
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             Online
           </div>
-          <div class="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500">🔔</div>
+          <AdminUserMenu />
         </div>
       </header>
 
