@@ -16,6 +16,13 @@ export default defineNuxtConfig({
     '@nuxtjs/supabase'
   ],
 
+  runtimeConfig: {
+    public: {
+      supabaseUrl: process.env.SUPABASE_URL,
+      supabaseKey: process.env.SUPABASE_KEY,
+    }
+  },
+
   supabase: {
     redirect: false,
     url: process.env.SUPABASE_URL,
