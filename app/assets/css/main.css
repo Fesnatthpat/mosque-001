@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* ใช้ @theme เพื่อตั้งค่า Tailwind v4 แทน tailwind.config.js */
+@theme {
+  /* เปลี่ยนฟอนต์ตระกูล sans (ค่าเริ่มต้นของเว็บ) ให้เป็น Prompt */
+    --font-sans: "Prompt", sans-serif;
+}
