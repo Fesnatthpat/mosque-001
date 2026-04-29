@@ -85,7 +85,7 @@ async function submitDonation() {
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                 
                 <!-- ฝั่งซ้าย: ข้อมูลการโอน (QR Code) -->
-                <div class="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-slate-100 p-8 md:p-12 text-center sticky top-28">
+                <div class="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-slate-100 p-8 md:p-12 text-center">
                     <p class="text-slate-600 text-lg mb-8 leading-relaxed">
                         {{ pageData.description }}
                     </p>

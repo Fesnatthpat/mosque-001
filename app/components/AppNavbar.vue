@@ -26,10 +26,11 @@ const navbarIcon = computed(() => settings.value?.page_navbar?.icon || '')
                 </div>
                 <span v-else class="text-2xl group-hover:scale-110 transition-transform">🕌</span>
 
-                <span class="group-hover:text-[#facc15] transition-colors">{{ navbarTitle }}</span>
+                <span class="group-hover:text-[#facc15] transition-colors whitespace-nowrap">{{ navbarTitle }}</span>
             </NuxtLink>
 
-            <ul class="hidden md:flex space-x-8 text-white font-medium">
+            <!-- Desktop Menu (แสดงผลเฉพาะจอใหญ่ขนาดคอมพิวเตอร์) -->
+            <ul class="hidden lg:flex space-x-8 text-white font-medium whitespace-nowrap">
                 <li>
                     <NuxtLink to="/"
                         class="pb-1 border-b-2 border-transparent hover:text-[#facc15] hover:border-[#facc15] transition-colors duration-300 block"
@@ -57,8 +58,9 @@ const navbarIcon = computed(() => settings.value?.page_navbar?.icon || '')
                 </li>
             </ul>
 
+            <!-- Mobile & Tablet Menu Button (แสดงผลบนมือถือและแท็บเล็ต) -->
             <button @click="isMenuOpen = !isMenuOpen"
-                class="md:hidden flex flex-col space-y-1.5 cursor-pointer focus:outline-none" aria-label="Toggle Menu">
+                class="lg:hidden flex flex-col space-y-1.5 cursor-pointer focus:outline-none z-[60]" aria-label="Toggle Menu">
                 <span class="w-6 h-0.5 bg-white block transition-all duration-300"
                     :class="{ 'rotate-45 translate-y-2': isMenuOpen }"></span>
                 <span class="w-6 h-0.5 bg-white block transition-all duration-300"
@@ -69,35 +71,48 @@ const navbarIcon = computed(() => settings.value?.page_navbar?.icon || '')
 
         </div>
 
-        <div v-show="isMenuOpen"
-            class="md:hidden bg-[#124d30] border-t border-[#1a6e45] absolute w-full left-0 shadow-lg">
-            <ul class="flex flex-col px-6 py-4 text-white font-medium space-y-4 justify-center items-center">
-                <li>
-                    <NuxtLink @click="isMenuOpen = false" to="/"
-                        class="block py-2 border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
-                        active-class="!text-[#facc15]">หน้าแรก</NuxtLink>
-                </li>
-                <li>
-                    <NuxtLink @click="isMenuOpen = false" to="/history"
-                        class="block py-2 border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
-                        active-class="!text-[#facc15]">ประวัติความเป็นมา</NuxtLink>
-                </li>
-                <li>
-                    <NuxtLink @click="isMenuOpen = false" to="/timetable"
-                        class="block py-2 border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
-                        active-class="!text-[#facc15]">ตารางเวลาละหมาด</NuxtLink>
-                </li>
-                <li>
-                    <NuxtLink @click="isMenuOpen = false" to="/activities"
-                        class="block py-2 border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
-                        active-class="!text-[#facc15]">กิจกรรม</NuxtLink>
-                </li>
-                <li>
-                    <NuxtLink @click="isMenuOpen = false" to="/donate"
-                        class="block py-2 border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
-                        active-class="!text-[#facc15]">ร่วมบริจาค</NuxtLink>
-                </li>
-            </ul>
-        </div>
+        <!-- Mobile & Tablet Dropdown Content -->
+        <Transition name="slide">
+            <div v-show="isMenuOpen"
+                class="lg:hidden bg-[#124d30] border-t border-[#1a6e45] absolute w-full left-0 shadow-lg z-50">
+                <ul class="flex flex-col px-6 py-8 text-white font-medium space-y-6 justify-center items-center">
+                    <li>
+                        <NuxtLink @click="isMenuOpen = false" to="/"
+                            class="block py-2 text-lg border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
+                            active-class="!text-[#facc15]">หน้าแรก</NuxtLink>
+                    </li>
+                    <li>
+                        <NuxtLink @click="isMenuOpen = false" to="/history"
+                            class="block py-2 text-lg border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
+                            active-class="!text-[#facc15]">ประวัติความเป็นมา</NuxtLink>
+                    </li>
+                    <li>
+                        <NuxtLink @click="isMenuOpen = false" to="/timetable"
+                            class="block py-2 text-lg border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
+                            active-class="!text-[#facc15]">ตารางเวลาละหมาด</NuxtLink>
+                    </li>
+                    <li>
+                        <NuxtLink @click="isMenuOpen = false" to="/activities"
+                            class="block py-2 text-lg border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
+                            active-class="!text-[#facc15]">กิจกรรม</NuxtLink>
+                    </li>
+                    <li>
+                        <NuxtLink @click="isMenuOpen = false" to="/donate"
+                            class="block py-2 text-lg border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
+                            active-class="!text-[#facc15]">ร่วมบริจาค</NuxtLink>
+                    </li>
+                </ul>
+            </div>
+        </Transition>
     </nav>
 </template>
+
+<style scoped>
+.slide-enter-active, .slide-leave-active {
+    transition: all 0.3s ease-in-out;
+}
+.slide-enter-from, .slide-leave-to {
+    transform: translateY(-10px);
+    opacity: 0;
+}
+</style>
