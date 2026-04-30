@@ -236,6 +236,62 @@
                 <label class="text-xs font-black text-slate-400 uppercase tracking-widest">เนื้อหาช่วงล่าง</label>
                 <textarea v-model="pageData.history.content_bottom" rows="4" class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all outline-none font-medium shadow-inner"></textarea>
               </div>
+
+              <!-- Personnel Section -->
+              <div class="space-y-6 pt-8 border-t border-slate-100">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <h5 class="text-sm font-bold text-slate-700">โครงสร้างบุคคล (Personnel Structure)</h5>
+                    <p class="text-xs text-slate-400">จัดการข้อมูลและรูปภาพของบุคลากรมัสยิด</p>
+                  </div>
+                  <button 
+                    @click="addPersonnel"
+                    class="bg-emerald-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-emerald-600 transition-all flex items-center gap-2"
+                  >
+                    ➕ เพิ่มบุคคล
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div 
+                    v-for="(person, index) in pageData.history.personnel" 
+                    :key="index"
+                    class="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 space-y-4 relative group"
+                  >
+                    <button 
+                      @click="removePersonnel(index)"
+                      class="absolute -top-2 -right-2 w-8 h-8 bg-white text-rose-500 rounded-full shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-50 border border-rose-100"
+                    >
+                      🗑️
+                    </button>
+
+                    <div class="space-y-4">
+                      <div class="relative w-full h-48 rounded-2xl overflow-hidden bg-slate-200 border border-slate-100 shadow-inner">
+                        <img v-if="person.image" :src="person.image" class="w-full h-full object-cover" />
+                        <div v-else class="w-full h-full flex items-center justify-center text-slate-400 text-3xl">👤</div>
+                        <label class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer text-white text-xs font-bold">
+                          เปลี่ยนรูปภาพ
+                          <input type="file" @change="(e) => handlePersonnelImageUpload(e, index)" class="hidden" />
+                        </label>
+                      </div>
+                      
+                      <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ชื่อ-นามสกุล</label>
+                        <input v-model="person.name" type="text" placeholder="ระบุชื่อ..." class="w-full px-4 py-2.5 bg-white border border-slate-100 rounded-xl focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-bold" />
+                      </div>
+
+                      <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ตำแหน่ง</label>
+                        <input v-model="person.position" type="text" placeholder="ระบุตำแหน่ง..." class="w-full px-4 py-2.5 bg-white border border-slate-100 rounded-xl focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="!pageData.history.personnel?.length" class="py-12 text-center border-2 border-dashed border-slate-200 rounded-[2rem]">
+                  <p class="text-slate-400 font-medium italic">ยังไม่มีข้อมูลบุคลากร กดปุ่มด้านบนเพื่อเพิ่ม</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -384,192 +440,79 @@ const generalSettings = ref({
   icon_url: ''
 })
 
-// --- General Branding Logic ---
-async function handleBrandingUpload(event, field) {
-  const file = event.target.files[0]
-  if (!file) return
-  const localUrl = URL.createObjectURL(file)
-  generalSettings.value[field] = localUrl
-  const fileExt = file.name.split('.').pop()
-  const fileName = `${field}_${Date.now()}.${fileExt}`
-  const filePath = `branding/${fileName}`
-  try {
-    const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file)
-    if (uploadError) throw uploadError
-    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(filePath)
-    generalSettings.value[field] = publicUrl
-  } catch (error) {
-    alert('อัปโหลดรูปภาพล้มเหลว')
-  }
-}
+const { data: settings, refresh } = await useFetch('/api/admin/settings')
 
 const pageData = ref({
-  navbar: {
-    title: '',
-    logo: '',
-    icon: '' // สำหรับ icon เล็กๆ หน้าชื่อ (ถ้ามี)
-  },
-  index: {
-    hero_title: '',
-    hero_subtitle: '',
-    hero_image: '',
-    about_text: '',
-    about_items: []
-  },
-  history: {
-    title: '',
-    content_top: '',
-    image: '',
-    content_bottom: ''
-  },
-  donate: {
-    title: '',
-    description: '',
-    qr_image: ''
-  },
-  activities: {
-    title: '',
-    description: '',
-    items: [] 
-  },
-  timetable: {
-    fajr: '05:00',
-    sunrise: '06:15',
-    dhuhr: '12:30',
-    asr: '15:45',
-    maghrib: '18:45',
-    isha: '20:00'
-  }
+  navbar: { logo: '', icon: '', title: '' },
+  index: { hero_title: '', hero_subtitle: '', hero_image: '', about_items: [] },
+  history: { title: '', content_top: '', image: '', content_bottom: '', personnel: [] },
+  donate: { title: '', description: '', qr_image: '' },
+  activities: { title: '', description: '', items: [] },
+  timetable: { fajr: '', sunrise: '', dhuhr: '', asr: '', maghrib: '', isha: '' }
 })
 
-// --- Navbar Image Logic ---
-async function handleNavbarImageUpload(event, field) {
-  const file = event.target.files[0]
-  if (!file) return
-  const localUrl = URL.createObjectURL(file)
-  pageData.value.navbar[field] = localUrl
-  const fileExt = file.name.split('.').pop()
-  const fileName = `navbar_${field}_${Date.now()}.${fileExt}`
-  const filePath = `branding/navbar/${fileName}`
-  try {
-    const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file)
-    if (uploadError) throw uploadError
-    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(filePath)
-    pageData.value.navbar[field] = publicUrl
-  } catch (error) {
-    alert('อัปโหลดรูปภาพ Navbar ล้มเหลว')
-  }
-}
-
 const prayerLabels = {
-  fajr: 'ละหมาดซุบฮิ (Fajr)',
-  sunrise: 'อาทิตย์ขึ้น (Sunrise)',
-  dhuhr: 'ละหมาดดุฮริ (Dhuhr)',
-  asr: 'ละหมาดอัศริ (Asr)',
-  maghrib: 'ละหมาดมัฆริบ (Maghrib)',
-  isha: 'ละหมาดอิชา (Isha)'
+  fajr: 'ซุบฮิ (Fajr)',
+  sunrise: 'ชุรูก (Sunrise)',
+  dhuhr: 'ซุฮริ (Dhuhr)',
+  asr: 'อัศริ (Asr)',
+  maghrib: 'มัฆริบ (Maghrib)',
+  isha: 'อีซา (Isha)'
 }
 
-// --- Dynamic Items Logic ---
+watch(settings, (newVal) => {
+  if (newVal) {
+    // Update general settings
+    for (const key of Object.keys(generalSettings.value)) {
+      if (newVal[key]) generalSettings.value[key] = newVal[key]
+    }
+    // Update page data
+    for (const key of Object.keys(pageData.value)) {
+      if (newVal[`page_${key}`]) pageData.value[key] = JSON.parse(JSON.stringify(newVal[`page_${key}`]))
+    }
+  }
+}, { immediate: true })
+
 function addAboutItem() {
   if (!pageData.value.index.about_items) pageData.value.index.about_items = []
-  pageData.value.index.about_items.push({
-    title: '',
-    description: '',
-    image: ''
-  })
+  pageData.value.index.about_items.push({ title: '', description: '', image: '' })
 }
 
 function removeAboutItem(index) {
-  pageData.value.index.about_items.splice(index, 1)
-}
-
-async function handleAboutItemUpload(event, index) {
-  const file = event.target.files[0]
-  if (!file) return
-  const localUrl = URL.createObjectURL(file)
-  pageData.value.index.about_items[index].image = localUrl
-  const fileExt = file.name.split('.').pop()
-  const fileName = `about_${index}_${Date.now()}.${fileExt}`
-  const filePath = `index/about/${fileName}`
-  try {
-    const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file)
-    if (uploadError) throw uploadError
-    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(filePath)
-    pageData.value.index.about_items[index].image = publicUrl
-  } catch (error) {
-    alert('อัปโหลดรูปภาพรายการล้มเหลว')
+  if (pageData.value.index.about_items) {
+    pageData.value.index.about_items.splice(index, 1)
   }
 }
 
-// --- Activities Logic ---
+function addPersonnel() {
+  if (!pageData.value.history.personnel) pageData.value.history.personnel = []
+  pageData.value.history.personnel.push({ name: '', position: '', image: '' })
+}
+
+function removePersonnel(index) {
+  if (pageData.value.history.personnel) {
+    pageData.value.history.personnel.splice(index, 1)
+  }
+}
+
 function addActivity() {
   if (!pageData.value.activities.items) pageData.value.activities.items = []
-  pageData.value.activities.items.push({
-    title: '',
-    date: '',
-    location: '',
-    description: '',
-    image: ''
-  })
+  pageData.value.activities.items.push({ title: '', date: '', location: '', description: '', image: '' })
 }
 
 function removeActivity(index) {
-  pageData.value.activities.items.splice(index, 1)
-}
-
-async function handleActivityImageUpload(event, index) {
-  const file = event.target.files[0]
-  if (!file) return
-  const localUrl = URL.createObjectURL(file)
-  pageData.value.activities.items[index].image = localUrl
-  const fileExt = file.name.split('.').pop()
-  const fileName = `act_${index}_${Date.now()}.${fileExt}`
-  const filePath = `activities/${fileName}`
-  try {
-    const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file)
-    if (uploadError) throw uploadError
-    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(filePath)
-    pageData.value.activities.items[index].image = publicUrl
-  } catch (error) {
-    alert('อัปโหลดรูปภาพกิจกรรมล้มเหลว')
+  if (pageData.value.activities.items) {
+    pageData.value.activities.items.splice(index, 1)
   }
 }
 
-// Fetch all settings
-const { data, refresh } = await useFetch('/api/admin/settings')
-
-watchEffect(() => {
-  if (data.value) {
-    Object.keys(generalSettings.value).forEach(key => {
-      if (data.value[key]) generalSettings.value[key] = data.value[key]
-    })
-    
-    Object.keys(pageData.value).forEach(page => {
-      const key = `page_${page}`
-      if (data.value[key]) {
-        pageData.value[page] = { ...pageData.value[page], ...data.value[key] }
-      }
-    })
-  }
-})
-
-// --- Image Upload Logic ---
-async function handleImageUpload(event, page, field) {
-  const file = event.target.files[0]
-  if (!file) return
-
-  // 1. สร้าง Preview ทันทีในเครื่อง (เพื่อให้เห็นรูปทันที)
-  const localPreviewUrl = URL.createObjectURL(file)
-  pageData.value[page][field] = localPreviewUrl
-
+// --- Unified Upload Helper ---
+async function uploadToSupabase(file, folder) {
   const fileExt = file.name.split('.').pop()
   const fileName = `${Math.random().toString(36).slice(2)}_${Date.now()}.${fileExt}`
-  const filePath = `${page}/${fileName}`
+  const filePath = `${folder}/${fileName}`
 
   try {
-    console.log('Uploading to bucket: images, path:', filePath)
-    // 2. Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('images')
       .upload(filePath, file, {
@@ -577,25 +520,109 @@ async function handleImageUpload(event, page, field) {
         upsert: false
       })
 
-    if (uploadError) {
-      console.error('Upload Error Details:', uploadError)
-      throw new Error(`Upload failed: ${uploadError.message}`)
-    }
+    if (uploadError) throw uploadError
 
-    console.log('Upload success:', uploadData)
-
-    // 3. Get Public URL (เมื่ออัปโหลดเสร็จค่อยใช้ URL จริงจาก Supabase)
     const { data: { publicUrl } } = supabase.storage
       .from('images')
       .getPublicUrl(filePath)
 
-    console.log('Public URL generated:', publicUrl)
-    pageData.value[page][field] = publicUrl
-    
-    alert('อัปโหลดรูปภาพเข้าสู่ระบบเรียบร้อย! ✅\nอย่าลืมกดปุ่ม "บันทึกทั้งหมด" ด้านบนเพื่อให้ระบบจำค่าไว้นะครับ')
+    return publicUrl
   } catch (error) {
-    console.error('Full Error Object:', error)
-    alert(`เกิดข้อผิดพลาด: ${error.message}\n\nตรวจสอบว่าได้รันคำสั่ง SQL ใน Supabase ครบถ้วนแล้วหรือยัง?`)
+    console.error(`Upload Error (${folder}):`, error)
+    throw error
+  }
+}
+
+// --- General Branding Logic ---
+async function handleBrandingUpload(event, field) {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  // Preview
+  generalSettings.value[field] = URL.createObjectURL(file)
+  
+  try {
+    const publicUrl = await uploadToSupabase(file, 'branding')
+    generalSettings.value[field] = publicUrl
+  } catch (error) {
+    alert(`อัปโหลดโลโก้ล้มเหลว: ${error.message || 'ตรวจสอบสิทธิ์ Storage Policy'}`)
+  }
+}
+
+// --- Navbar Image Logic ---
+async function handleNavbarImageUpload(event, field) {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  pageData.value.navbar[field] = URL.createObjectURL(file)
+  
+  try {
+    const publicUrl = await uploadToSupabase(file, 'branding/navbar')
+    pageData.value.navbar[field] = publicUrl
+  } catch (error) {
+    alert(`อัปโหลดรูป Navbar ล้มเหลว: ${error.message}`)
+  }
+}
+
+// --- Dynamic Items Logic ---
+async function handleAboutItemUpload(event, index) {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  pageData.value.index.about_items[index].image = URL.createObjectURL(file)
+  
+  try {
+    const publicUrl = await uploadToSupabase(file, 'index/about')
+    pageData.value.index.about_items[index].image = publicUrl
+  } catch (error) {
+    alert(`อัปโหลดรูปรายการล้มเหลว: ${error.message}`)
+  }
+}
+
+// --- Activities Logic ---
+async function handleActivityImageUpload(event, index) {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  pageData.value.activities.items[index].image = URL.createObjectURL(file)
+  
+  try {
+    const publicUrl = await uploadToSupabase(file, 'activities')
+    pageData.value.activities.items[index].image = publicUrl
+  } catch (error) {
+    alert(`อัปโหลดรูปกิจกรรมล้มเหลว: ${error.message}`)
+  }
+}
+
+// --- Image Upload Logic (General) ---
+async function handleImageUpload(event, page, field) {
+  const file = event.target.files[0]
+  if (!file) return
+
+  pageData.value[page][field] = URL.createObjectURL(file)
+
+  try {
+    const publicUrl = await uploadToSupabase(file, page)
+    pageData.value[page][field] = publicUrl
+    alert('อัปโหลดรูปภาพสำเร็จ! ✅ อย่าลืมกดบันทึกทั้งหมด')
+  } catch (error) {
+    alert(`อัปโหลดล้มเหลว: ${error.message}`)
+  }
+}
+
+// --- Personnel Logic ---
+async function handlePersonnelImageUpload(event, index) {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  pageData.value.history.personnel[index].image = URL.createObjectURL(file)
+  
+  try {
+    const publicUrl = await uploadToSupabase(file, 'history/personnel')
+    pageData.value.history.personnel[index].image = publicUrl
+  } catch (error) {
+    console.error('Upload Error:', error)
+    alert(`การอัปโหลดล้มเหลว: ${error.message || JSON.stringify(error)}`)
   }
 }
 

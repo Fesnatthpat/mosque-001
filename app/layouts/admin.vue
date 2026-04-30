@@ -51,12 +51,24 @@
       </nav>
 
       <div class="p-6 border-t border-slate-800 mt-auto">
-        <div class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-2xl border border-slate-700/50">
-          <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-sm font-bold text-white uppercase">AD</div>
-          <div class="overflow-hidden">
-            <p class="text-sm font-semibold truncate text-slate-200">Admin</p>
-            <p class="text-[11px] text-emerald-400">Main Account</p>
+        <div v-if="user" class="space-y-4">
+          <div class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-2xl border border-slate-700/50">
+            <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-sm font-bold text-white uppercase shrink-0">
+              {{ user.email?.[0]?.toUpperCase() }}
+            </div>
+            <div class="overflow-hidden">
+              <p class="text-sm font-semibold truncate text-slate-200">{{ user.email }}</p>
+              <p class="text-[11px] text-emerald-400 font-medium">แอดมินระบบ</p>
+            </div>
           </div>
+          
+          <button 
+            @click="handleLogout"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-all duration-200 group border border-transparent hover:border-rose-500/20"
+          >
+            <span class="text-xl group-hover:scale-110 transition-transform">🚪</span>
+            <span class="font-bold text-xs uppercase tracking-widest">ออกจากระบบ</span>
+          </button>
         </div>
       </div>
     </aside>
@@ -78,7 +90,6 @@
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             Online
           </div>
-          <AdminUserMenu />
         </div>
       </header>
 
@@ -101,6 +112,9 @@
 const route = useRoute()
 const isMobileMenuOpen = ref(false)
 
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
+
 const navLinks = [
   { to: '/admin', label: 'ภาพรวมแดชบอร์ด', icon: '📊' },
   { to: '/admin/donations', label: 'ตรวจสอบการโอนเงิน', icon: '🛡️' },
@@ -111,6 +125,11 @@ const pageTitle = computed(() => {
   const current = navLinks.find(link => link.to === route.path)
   return current ? current.label : 'Admin Panel'
 })
+
+async function handleLogout() {
+  await supabase.auth.signOut()
+  navigateTo('/admin/login')
+}
 </script>
 
 <style>
