@@ -406,7 +406,10 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: false })
+definePageMeta({ 
+  layout: false,
+  middleware: 'auth'
+})
 
 const supabase = useSupabaseClient()
 const activeTab = ref('general')

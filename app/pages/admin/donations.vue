@@ -51,7 +51,7 @@
                     <!-- Hover Preview Tooltip -->
                     <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-[110] opacity-0 invisible group-hover/slip:opacity-100 group-hover/slip:visible transition-all duration-300 pointer-events-none">
                       <div class="bg-white p-2 rounded-2xl shadow-2xl border border-slate-200 w-48 overflow-hidden">
-                        <img :src="donation.slipUrl" class="w-full h-auto rounded-xl shadow-inner" />
+                        <img :src="donation.slipUrl" class="w-full z-30 h-auto rounded-xl shadow-inner" />
                         <p class="text-[9px] font-black text-center mt-2 text-slate-400 uppercase tracking-tighter">ตัวอย่างสลิปโอนเงิน</p>
                       </div>
                       <!-- ลูกศรชี้ลง -->
@@ -103,7 +103,10 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: false })
+definePageMeta({ 
+  layout: false,
+  middleware: 'auth'
+})
 
 const { data, refresh } = await useFetch('/api/admin/donations')
 

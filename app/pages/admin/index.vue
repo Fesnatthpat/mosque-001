@@ -83,6 +83,9 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: false })
+definePageMeta({ 
+  layout: false,
+  middleware: 'auth'
+})
 const { data, refresh } = await useFetch('/api/admin/donations')
 </script>
