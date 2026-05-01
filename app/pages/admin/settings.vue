@@ -390,12 +390,35 @@
 
           <!-- Page: Timetable -->
           <div v-if="activeTab === 'timetable'" class="space-y-8">
-            <h4 class="font-bold text-slate-800 text-lg border-b pb-4">ตารางเวลาละหมาด (Prayer Timetable)</h4>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
-              <div v-for="(val, key) in prayerLabels" :key="key" class="space-y-2 p-6 bg-slate-50 rounded-[2rem] border border-slate-100 text-center">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">{{ val }}</label>
-                <input v-model="pageData.timetable[key]" type="time" class="w-full bg-white border-none text-center text-2xl font-black text-slate-800 rounded-xl py-3 shadow-inner focus:ring-2 focus:ring-emerald-500/10 outline-none" />
-              </div>
+            <div class="flex justify-between items-center border-b pb-4">
+              <h4 class="font-bold text-slate-800 text-lg">ตารางเวลาละหมาด (Prayer Timetable)</h4>
+              <button @click="addTimetable" class="bg-emerald-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-emerald-600 transition-all flex items-center gap-2">
+                ➕ เพิ่มตารางเวลา
+              </button>
+            </div>
+
+            <div v-for="(table, idx) in pageData.timetable" :key="idx" class="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 relative group space-y-6">
+               <button @click="removeTimetable(idx)" class="absolute top-4 right-4 w-10 h-10 bg-white text-rose-500 rounded-full shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-rose-50 border border-rose-100">
+                  🗑️
+                </button>
+
+                <div class="space-y-2">
+                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">หัวข้อตาราง (เช่น วันที่/เดือน/ปี)</label>
+                  <input v-model="table.date_header" type="text" placeholder="เช่น ประจำวันที่ 1 พฤษภาคม 2569" class="w-full px-5 py-3.5 bg-white border border-slate-100 rounded-2xl focus:ring-2 focus:ring-emerald-500/10 outline-none font-bold" />
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                  <div v-for="(val, key) in prayerLabels" :key="key" class="space-y-2 p-6 bg-white rounded-[2rem] border border-slate-100 text-center">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">{{ val }}</label>
+                    <input v-model="table[key]" type="time" class="w-full bg-slate-50 border-none text-center text-2xl font-black text-slate-800 rounded-xl py-3 shadow-inner focus:ring-2 focus:ring-emerald-500/10 outline-none" />
+                  </div>
+                </div>
+            </div>
+
+            <div v-if="!pageData.timetable?.length" class="py-20 text-center border-2 border-dashed border-slate-200 rounded-[3rem]">
+              <div class="text-5xl mb-4">📅</div>
+              <p class="text-slate-400 font-bold">ยังไม่มีข้อมูลตารางเวลา</p>
+              <button @click="addTimetable" class="mt-4 text-emerald-600 font-bold hover:underline">เพิ่มตารางเวลาแรกของคุณ</button>
             </div>
           </div>
 
@@ -451,7 +474,7 @@ const pageData = ref({
   history: { title: '', content_top: '', image: '', content_bottom: '', personnel: [] },
   donate: { title: '', description: '', qr_image: '' },
   activities: { title: '', description: '', items: [] },
-  timetable: { fajr: '', sunrise: '', dhuhr: '', asr: '', maghrib: '', isha: '' }
+  timetable: []
 })
 
 const prayerLabels = {
@@ -471,7 +494,18 @@ watch(settings, (newVal) => {
     }
     // Update page data
     for (const key of Object.keys(pageData.value)) {
-      if (newVal[`page_${key}`]) pageData.value[key] = JSON.parse(JSON.stringify(newVal[`page_${key}`]))
+      if (newVal[`page_${key}`]) {
+        pageData.value[key] = JSON.parse(JSON.stringify(newVal[`page_${key}`]))
+      }
+    }
+
+    // Ensure timetable is an array (migration for old single-object data)
+    if (pageData.value.timetable && !Array.isArray(pageData.value.timetable)) {
+      const oldData = pageData.value.timetable;
+      pageData.value.timetable = [{
+        date_header: 'ตารางเวลาปกติ',
+        ...oldData
+      }];
     }
   }
 }, { immediate: true })
@@ -506,6 +540,25 @@ function addActivity() {
 function removeActivity(index) {
   if (pageData.value.activities.items) {
     pageData.value.activities.items.splice(index, 1)
+  }
+}
+
+function addTimetable() {
+  if (!pageData.value.timetable) pageData.value.timetable = []
+  pageData.value.timetable.push({ 
+    date_header: '', 
+    fajr: '05:00', 
+    sunrise: '06:15', 
+    dhuhr: '12:30', 
+    asr: '15:45', 
+    maghrib: '18:45', 
+    isha: '20:00' 
+  })
+}
+
+function removeTimetable(index) {
+  if (pageData.value.timetable) {
+    pageData.value.timetable.splice(index, 1)
   }
 }
 
