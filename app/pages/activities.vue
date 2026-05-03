@@ -127,57 +127,57 @@ const formatTime = (dateStr: string) => {
             leave-from-class="opacity-100"
             leave-to-class="opacity-0"
         >
-            <div v-if="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-[#0f172a]/90 backdrop-blur-sm" @click.self="closeModal">
-                <div class="bg-white w-full max-w-5xl max-h-full overflow-y-auto rounded-[3rem] shadow-2xl relative animate-in fade-in zoom-in duration-300">
+            <div v-if="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 md:p-10 bg-[#0f172a]/95 backdrop-blur-md" @click.self="closeModal">
+                <div class="bg-white w-full max-w-5xl max-h-[95vh] overflow-y-auto rounded-[2rem] md:rounded-[3rem] shadow-2xl relative animate-in fade-in zoom-in duration-300">
                     <!-- ปุ่มปิด -->
-                    <button @click="closeModal" class="absolute top-6 right-6 z-10 w-12 h-12 bg-white/20 hover:bg-rose-500 backdrop-blur text-white rounded-full flex items-center justify-center transition-all shadow-xl group">
-                        <span class="text-2xl group-hover:scale-125 transition-transform">✕</span>
+                    <button @click="closeModal" class="fixed sm:absolute top-4 right-4 z-[110] w-10 h-10 bg-black/20 hover:bg-rose-500 backdrop-blur text-white rounded-full flex items-center justify-center transition-all shadow-xl group">
+                        <span class="text-xl group-hover:scale-125 transition-transform">✕</span>
                     </button>
 
                     <div class="flex flex-col lg:flex-row h-full">
                         <!-- รูปภาพด้านซ้าย -->
-                        <div class="w-full lg:w-1/2 h-[300px] lg:h-auto shrink-0 relative">
+                        <div class="w-full lg:w-1/2 h-[250px] sm:h-[350px] lg:h-auto shrink-0 relative">
                             <img :src="selectedActivity.image || '/images/home2.jpg'" class="w-full h-full object-cover" />
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                            <div class="absolute bottom-8 left-10">
-                                <span class="px-6 py-2.5 bg-emerald-500 text-white rounded-full text-xs font-black uppercase tracking-widest shadow-lg">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
+                            <div class="absolute bottom-6 left-6 md:bottom-8 md:left-10">
+                                <span class="px-5 py-2 bg-emerald-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">
                                     📅 {{ formatDateBE(selectedActivity.date) }}
                                 </span>
                             </div>
                         </div>
 
                         <!-- เนื้อหาด้านขวา -->
-                        <div class="flex-1 p-10 md:p-16 overflow-y-auto">
-                            <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-8 leading-tight">
+                        <div class="flex-1 p-6 md:p-12 lg:p-16 overflow-y-auto">
+                            <h2 class="text-2xl md:text-4xl font-black text-slate-900 mb-6 md:mb-8 leading-tight">
                                 {{ selectedActivity.title }}
                             </h2>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                                <div class="flex items-center gap-4 p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100">
-                                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-2xl">📍</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-12">
+                                <div class="flex items-center gap-4 p-4 md:p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                                    <div class="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-xl md:text-2xl">📍</div>
                                     <div>
-                                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">สถานที่จัด</p>
-                                        <p class="font-bold text-slate-700">{{ selectedActivity.location || 'มัสยิดบ้านสมเด็จ' }}</p>
+                                        <p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">สถานที่จัด</p>
+                                        <p class="font-bold text-slate-700 text-sm md:text-base">{{ selectedActivity.location || 'มัสยิดบ้านสมเด็จ' }}</p>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-4 p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100">
-                                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-2xl">⏰</div>
+                                <div class="flex items-center gap-4 p-4 md:p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                                    <div class="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-xl md:text-2xl">⏰</div>
                                     <div>
-                                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">เวลาเริ่ม</p>
-                                        <p class="font-bold text-slate-700">{{ formatTime(selectedActivity.date) }}</p>
+                                        <p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">เวลาเริ่ม</p>
+                                        <p class="font-bold text-slate-700 text-sm md:text-base">{{ formatTime(selectedActivity.date) }}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="prose prose-slate max-w-none">
-                                <h4 class="text-sm font-black text-slate-400 uppercase tracking-widest mb-4">รายละเอียดกิจกรรม</h4>
-                                <p class="text-slate-600 leading-[1.8] text-lg whitespace-pre-line">
+                                <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">รายละเอียดกิจกรรม</h4>
+                                <p class="text-slate-600 leading-[1.8] text-base md:text-lg whitespace-pre-line">
                                     {{ selectedActivity.description }}
                                 </p>
                             </div>
 
-                            <div class="mt-12 pt-10 border-t border-slate-100">
-                                <button @click="closeModal" class="px-10 py-4 bg-slate-100 text-slate-600 font-black rounded-2xl hover:bg-slate-200 transition-all active:scale-95 text-sm uppercase tracking-widest">
+                            <div class="mt-8 md:mt-12 pt-8 md:pt-10 border-t border-slate-100">
+                                <button @click="closeModal" class="w-full sm:w-auto px-10 py-4 bg-slate-100 text-slate-600 font-black rounded-2xl hover:bg-slate-200 transition-all active:scale-95 text-xs uppercase tracking-widest">
                                     ปิดหน้าต่างนี้
                                 </button>
                             </div>

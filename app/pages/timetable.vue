@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 
 const { data: settings } = await useFetch('/api/admin/settings')
+const { data: prayerData } = await useFetch('/api/prayer-times')
 
 // 1. เพิ่มตัวแปรสำหรับดึงวันที่ปัจจุบันและจัดรูปแบบเป็นภาษาไทย
 const currentDate = computed(() => {
@@ -15,9 +16,18 @@ const currentDate = computed(() => {
 })
 
 const timetables = computed(() => {
-    const data = settings.value?.page_timetable;
-    if (Array.isArray(data)) return data;
-    if (data) return [{ date_header: 'ประจำ' + currentDate.value, ...data }];
+    if (prayerData.value?.success) {
+        return [{
+            date_header: 'ประจำ' + currentDate.value,
+            fajr: prayerData.value.times.fajr,
+            sunrise: prayerData.value.times.sunrise,
+            dhuhr: prayerData.value.times.dhuhr,
+            asr: prayerData.value.times.asr,
+            maghrib: prayerData.value.times.maghrib,
+            isha: prayerData.value.times.isha
+        }];
+    }
+
     return [{
         date_header: 'ประจำ' + currentDate.value,
         fajr: '05:00',
@@ -62,30 +72,31 @@ const getPrayers = (table: any) => [
                         <table class="w-full text-left border-collapse">
                             <!-- หัวตาราง -->
                             <thead>
-                                <tr class="bg-emerald-50 text-emerald-800 border-b border-emerald-100">
-                                    <th class="py-5 px-8 font-bold text-lg whitespace-nowrap">เวลาละหมาด</th>
-                                    <th class="py-5 px-8 font-bold text-lg text-right whitespace-nowrap">เวลา (น.)</th>
-                                </tr>
+                            <tr class="bg-emerald-50 text-emerald-800 border-b border-emerald-100">
+                                <th class="py-4 px-6 md:py-5 md:px-8 font-bold text-base md:text-lg whitespace-nowrap">เวลาละหมาด</th>
+                                <th class="py-4 px-6 md:py-5 md:px-8 font-bold text-base md:text-lg text-right whitespace-nowrap">เวลา (น.)</th>
+                            </tr>
                             </thead>
                             <!-- เนื้อหาในตาราง -->
                             <tbody>
-                                <tr 
-                                    v-for="(prayer, index) in getPrayers(table)" 
-                                    :key="prayer.name"
-                                    class="border-b border-slate-50 hover:bg-slate-50 transition-colors duration-300"
-                                    :class="{ 'bg-slate-50/30': index % 2 !== 0 }"
-                                >
-                                    <td class="py-5 px-8">
-                                        <div class="flex items-center gap-4">
-                                            <span class="text-3xl drop-shadow-sm">{{ prayer.icon }}</span>
-                                            <span class="font-bold text-slate-700 text-lg">{{ prayer.name }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-5 px-8 text-right">
-                                        <span class="text-2xl font-black text-[#155d3a] tracking-tight">{{ prayer.time }}</span>
-                                    </td>
-                                </tr>
+                            <tr 
+                                v-for="(prayer, index) in getPrayers(table)" 
+                                :key="prayer.name"
+                                class="border-b border-slate-50 hover:bg-slate-50 transition-colors duration-300"
+                                :class="{ 'bg-slate-50/30': index % 2 !== 0 }"
+                            >
+                                <td class="py-4 px-6 md:py-5 md:px-8">
+                                    <div class="flex items-center gap-3 md:gap-4">
+                                        <span class="text-2xl md:text-3xl drop-shadow-sm">{{ prayer.icon }}</span>
+                                        <span class="font-bold text-slate-700 text-base md:text-lg">{{ prayer.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6 md:py-5 md:px-8 text-right">
+                                    <span class="text-xl md:text-2xl font-black text-[#155d3a] tracking-tight">{{ prayer.time }}</span>
+                                </td>
+                            </tr>
                             </tbody>
+
                         </table>
                     </div>
                 </div>

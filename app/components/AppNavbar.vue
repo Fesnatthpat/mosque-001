@@ -74,34 +74,51 @@ const navbarIcon = computed(() => settings.value?.page_navbar?.icon || '')
         <!-- Mobile & Tablet Dropdown Content -->
         <Transition name="slide">
             <div v-show="isMenuOpen"
-                class="lg:hidden bg-[#124d30] border-t border-[#1a6e45] absolute w-full left-0 shadow-lg z-50">
-                <ul class="flex flex-col px-6 py-8 text-white font-medium space-y-6 justify-center items-center">
+                class="lg:hidden bg-[#155d3a]/95 backdrop-blur-md border-t border-white/10 fixed top-[72px] left-0 w-full h-[calc(100vh-72px)] overflow-y-auto z-50">
+                <ul class="flex flex-col px-8 py-12 text-white font-medium space-y-8">
                     <li>
                         <NuxtLink @click="isMenuOpen = false" to="/"
-                            class="block py-2 text-lg border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
-                            active-class="!text-[#facc15]">หน้าแรก</NuxtLink>
+                            class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
+                            active-class="!text-[#facc15]">
+                            <span class="text-2xl">🏠</span> หน้าแรก
+                        </NuxtLink>
                     </li>
                     <li>
                         <NuxtLink @click="isMenuOpen = false" to="/history"
-                            class="block py-2 text-lg border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
-                            active-class="!text-[#facc15]">ประวัติความเป็นมา</NuxtLink>
+                            class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
+                            active-class="!text-[#facc15]">
+                            <span class="text-2xl">📖</span> ประวัติความเป็นมา
+                        </NuxtLink>
                     </li>
                     <li>
                         <NuxtLink @click="isMenuOpen = false" to="/timetable"
-                            class="block py-2 text-lg border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
-                            active-class="!text-[#facc15]">ตารางเวลาละหมาด</NuxtLink>
+                            class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
+                            active-class="!text-[#facc15]">
+                            <span class="text-2xl">🕒</span> ตารางเวลาละหมาด
+                        </NuxtLink>
                     </li>
                     <li>
                         <NuxtLink @click="isMenuOpen = false" to="/activities"
-                            class="block py-2 text-lg border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
-                            active-class="!text-[#facc15]">กิจกรรม</NuxtLink>
+                            class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
+                            active-class="!text-[#facc15]">
+                            <span class="text-2xl">📅</span> กิจกรรม
+                        </NuxtLink>
                     </li>
                     <li>
                         <NuxtLink @click="isMenuOpen = false" to="/donate"
-                            class="block py-2 text-lg border-b border-transparent hover:text-[#facc15] transition-colors duration-300"
-                            active-class="!text-[#facc15]">ร่วมบริจาค</NuxtLink>
+                            class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
+                            active-class="!text-[#facc15]">
+                            <span class="text-2xl">🤝</span> ร่วมบริจาค
+                        </NuxtLink>
                     </li>
                 </ul>
+                
+                <div class="px-8 pb-12 mt-auto">
+                    <div class="p-6 bg-white/5 rounded-[2rem] border border-white/10 text-center">
+                        <p class="text-xs text-white/40 uppercase tracking-[0.2em] font-black mb-1">Mosque Management</p>
+                        <p class="text-white font-bold">{{ navbarTitle }}</p>
+                    </div>
+                </div>
             </div>
         </Transition>
     </nav>

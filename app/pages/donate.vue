@@ -85,14 +85,14 @@ async function submitDonation() {
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                 
                 <!-- ฝั่งซ้าย: ข้อมูลการโอน (QR Code) -->
-                <div class="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-slate-100 p-8 md:p-12 text-center">
-                    <p class="text-slate-600 text-lg mb-8 leading-relaxed">
+                <div class="bg-white rounded-[2.5rem] md:rounded-[3rem] shadow-xl overflow-hidden border border-slate-100 p-6 md:p-12 text-center">
+                    <p class="text-slate-600 text-base md:text-lg mb-6 md:mb-8 leading-relaxed">
                         {{ pageData.description }}
                     </p>
 
-                    <div class="mb-8 inline-block p-6 bg-emerald-50 rounded-[2.5rem] border-2 border-dashed border-emerald-200">
+                    <div class="mb-8 inline-block p-4 md:p-6 bg-emerald-50 rounded-[2rem] md:rounded-[2.5rem] border-2 border-dashed border-emerald-200">
                         <img :src="pageData.qr_image" alt="QR Code สำหรับบริจาค"
-                            class="w-64 h-64 md:w-80 md:h-80 object-contain mx-auto rounded-2xl shadow-sm">
+                            class="w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain mx-auto rounded-2xl shadow-sm">
                     </div>
 
                     <div class="space-y-4 max-w-sm mx-auto">
