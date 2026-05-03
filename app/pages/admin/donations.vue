@@ -12,8 +12,8 @@
       </div>
 
       <!-- Table -->
-      <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-        <div class="overflow-x-auto">
+      <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100">
+        <div class="overflow-x-auto overflow-y-visible">
           <table class="w-full text-left border-collapse text-sm">
             <thead>
               <tr class="text-[10px] uppercase tracking-widest text-slate-400 font-black border-b border-slate-50 bg-slate-50/30">
@@ -41,22 +41,18 @@
                 </td>
                 
                 <!-- Slip Column with Hover Preview -->
-                <td class="px-8 py-6 text-center relative">
+                <td class="px-8 py-6 text-center">
                   <div v-if="donation.slipUrl" class="relative inline-block group/slip">
                     <!-- ปุ่มดูสลิป -->
-                    <a :href="donation.slipUrl" target="_blank" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all flex items-center gap-2">
+                    <a 
+                      :href="donation.slipUrl" 
+                      target="_blank" 
+                      class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all flex items-center gap-2"
+                      @mouseenter="(e) => showPreview(donation.slipUrl, e)"
+                      @mouseleave="hidePreview"
+                    >
                       <span>📸 ดูสลิป</span>
                     </a>
-                    
-                    <!-- Hover Preview Tooltip -->
-                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-[110] opacity-0 invisible group-hover/slip:opacity-100 group-hover/slip:visible transition-all duration-300 pointer-events-none">
-                      <div class="bg-white p-2 rounded-2xl shadow-2xl border border-slate-200 w-48 overflow-hidden">
-                        <img :src="donation.slipUrl" class="w-full z-30 h-auto rounded-xl shadow-inner" />
-                        <p class="text-[9px] font-black text-center mt-2 text-slate-400 uppercase tracking-tighter">ตัวอย่างสลิปโอนเงิน</p>
-                      </div>
-                      <!-- ลูกศรชี้ลง -->
-                      <div class="w-3 h-3 bg-white border-r border-b border-slate-200 rotate-45 absolute -bottom-1.5 left-1/2 -translate-x-1/2"></div>
-                    </div>
                   </div>
                   <span v-else class="text-slate-300 text-xs italic">ไม่มีหลักฐาน</span>
                 </td>
@@ -99,6 +95,32 @@
         </div>
       </div>
     </NuxtLayout>
+
+    <Teleport to="body">
+      <div 
+        v-if="preview.visible"
+        class="fixed z-[9999] pointer-events-none transition-opacity duration-200"
+        :style="{
+          left: `${preview.x}px`,
+          top: `${preview.y}px`,
+          transform: preview.placement === 'top' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)'
+        }"
+      >
+        <div class="bg-white p-3 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-200 w-64 md:w-80 ring-4 ring-black/5" :class="preview.placement === 'top' ? 'mb-4' : 'mt-4'">
+          <img :src="preview.url" class="w-full h-auto rounded-xl" />
+          <div class="mt-3 pt-3 border-t border-slate-100">
+             <p class="text-[10px] font-black text-center text-slate-400 uppercase tracking-widest">หลักฐานการโอนเงิน</p>
+          </div>
+          <!-- ลูกศรชี้ (บนหรือล่าง) -->
+          <div 
+            class="w-4 h-4 bg-white border-slate-200 absolute left-1/2 -translate-x-1/2 rotate-45"
+            :class="preview.placement === 'top' 
+              ? 'border-r border-b -bottom-2' 
+              : 'border-l border-t -top-2'"
+          ></div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -109,6 +131,43 @@ definePageMeta({
 })
 
 const { data, refresh } = await useFetch('/api/admin/donations')
+
+// Preview Logic
+const preview = ref({
+  visible: false,
+  url: '',
+  x: 0,
+  y: 0
+})
+
+function showPreview(url, event) {
+  const rect = event.currentTarget.getBoundingClientRect()
+  const scrollY = window.scrollY
+  const viewportHeight = window.innerHeight
+  const previewHeight = 400 // Approximate height of the preview box
+
+  // Default position: Above the button
+  let y = rect.top + scrollY - 10
+  let placement = 'top'
+
+  // If there's not enough space above, show below the button
+  if (rect.top < previewHeight) {
+    y = rect.bottom + scrollY + 10
+    placement = 'bottom'
+  }
+
+  preview.value = {
+    visible: true,
+    url: url,
+    x: rect.left + (rect.width / 2),
+    y: y,
+    placement: placement
+  }
+}
+
+function hidePreview() {
+  preview.value.visible = false
+}
 
 async function updateStatus(id, status) {
   try {
