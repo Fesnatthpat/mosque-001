@@ -13,6 +13,8 @@ model Donation {
   donorEmail  String?
   blessing    String?
   slipUrl     String?
+  taxId       String?
+  address     String?
   date        DateTime @default(now())
   status      String   @default("pending")
 }
@@ -21,4 +23,12 @@ model WebsiteSetting {
   id    Int    @id @default(autoincrement())
   key   String @unique
   value String
+}
+
+model VisitorLog {
+  id        Int      @id @default(autoincrement())
+  path      String
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
 }

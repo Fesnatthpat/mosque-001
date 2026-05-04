@@ -284,6 +284,11 @@
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ตำแหน่ง</label>
                         <input v-model="person.position" type="text" placeholder="ระบุตำแหน่ง..." class="w-full px-4 py-2.5 bg-white border border-slate-100 rounded-xl focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm" />
                       </div>
+
+                      <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ประวัติย่อ</label>
+                        <textarea v-model="person.bio" rows="3" placeholder="ระบุประวัติย่อ..." class="w-full px-4 py-2.5 bg-white border border-slate-100 rounded-xl focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm"></textarea>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -469,7 +474,7 @@ function removeAboutItem(index) {
 
 function addPersonnel() {
   if (!pageData.value.history.personnel) pageData.value.history.personnel = []
-  pageData.value.history.personnel.push({ name: '', position: '', image: '' })
+  pageData.value.history.personnel.push({ name: '', position: '', image: '', bio: '' })
 }
 
 function removePersonnel(index) {

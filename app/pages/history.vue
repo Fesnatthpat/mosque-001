@@ -65,7 +65,10 @@ const personnelList = computed(() => settings.value?.page_history?.personnel || 
                     <!-- ส่วนข้อความ -->
                     <div class="p-6 text-center">
                         <h3 class="text-xl font-bold text-gray-800 mb-1">{{ person.name }}</h3>
-                        <p class="text-[#155d3a] font-medium">{{ person.position }}</p>
+                        <p class="text-[#155d3a] font-medium mb-3">{{ person.position }}</p>
+                        <p v-if="person.bio" class="text-gray-500 text-sm leading-relaxed border-t pt-3 mt-3">
+                            {{ person.bio }}
+                        </p>
                     </div>
 
                 </div>

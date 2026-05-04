@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
-    const { amount, donorName, blessing, slipUrl } = body
+    const { amount, donorName, blessing, slipUrl, taxId, address } = body
 
     const { PrismaClient } = await import('@prisma/client')
     const { PrismaPg } = await import('@prisma/adapter-pg')
@@ -18,6 +18,8 @@ export default defineEventHandler(async (event) => {
           donorName,
           blessing,
           slipUrl,
+          taxId,
+          address,
           status: 'pending'
         }
       })

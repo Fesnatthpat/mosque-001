@@ -13,7 +13,10 @@ const form = ref({
     amount: '',
     donorName: '',
     blessing: '',
-    slipUrl: ''
+    slipUrl: '',
+    requestTaxInvoice: false,
+    taxId: '',
+    address: ''
 })
 
 const isUploading = ref(false)
@@ -128,6 +131,28 @@ async function submitDonation() {
                         <div class="space-y-2">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">คำอวยพร / ข้อความ</label>
                             <textarea v-model="form.blessing" rows="3" placeholder="ข้อความถึงมัสยิด..." class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500/20 outline-none font-medium"></textarea>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:bg-slate-100 transition-all" @click="form.requestTaxInvoice = !form.requestTaxInvoice">
+                                <div class="w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all" :class="form.requestTaxInvoice ? 'bg-emerald-500 border-emerald-500' : 'bg-white border-slate-300'">
+                                    <span v-if="form.requestTaxInvoice" class="text-white text-xs">✓</span>
+                                </div>
+                                <span class="text-sm font-bold text-slate-700">ต้องการใบกำกับภาษี / ใบอนุโมทนาบัตร</span>
+                            </div>
+
+                            <transition name="fade">
+                                <div v-if="form.requestTaxInvoice" class="space-y-4 p-6 bg-emerald-50/50 rounded-[2rem] border border-emerald-100">
+                                    <div class="space-y-2">
+                                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">เลขประจำตัวผู้เสียภาษี / เลขบัตรประชาชน</label>
+                                        <input v-model="form.taxId" type="text" placeholder="ระบุเลข 13 หลัก..." class="w-full px-5 py-4 bg-white border-none rounded-2xl focus:ring-2 focus:ring-emerald-500/20 outline-none font-bold shadow-sm" />
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ที่อยู่สำหรับการจัดส่ง / ออกเอกสาร</label>
+                                        <textarea v-model="form.address" rows="3" placeholder="ระบุที่อยู่โดยละเอียด..." class="w-full px-5 py-4 bg-white border-none rounded-2xl focus:ring-2 focus:ring-emerald-500/20 outline-none font-medium shadow-sm"></textarea>
+                                    </div>
+                                </div>
+                            </transition>
                         </div>
 
                         <div class="space-y-4">

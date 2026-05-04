@@ -119,6 +119,7 @@ const user = useSupabaseUser()
 const navLinks = [
   { to: '/admin', label: 'ภาพรวมแดชบอร์ด', icon: '📊' },
   { to: '/admin/donations', label: 'ตรวจสอบการโอนเงิน', icon: '🛡️' },
+  { to: '/admin/statistics', label: 'สถิติผู้เข้าชม', icon: '📈' },
   { to: '/admin/settings', label: 'ตั้งค่าเว็บไซต์', icon: '⚙️' }
 ]
 
