@@ -12,7 +12,25 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    const query = getQuery(event)
+    const filterMonth = query.month ? parseInt(query.month as string) : null
+    const filterYear = query.year ? parseInt(query.year as string) : null
+
+    let whereClause: any = {}
+    
+    if (filterMonth !== null && filterYear !== null) {
+      const startDate = new Date(filterYear, filterMonth - 1, 1)
+      const endDate = new Date(filterYear, filterMonth, 0, 23, 59, 59)
+      whereClause = {
+        date: {
+          gte: startDate,
+          lte: endDate
+        }
+      }
+    }
+
     const donations = await prisma.donation.findMany({
+      where: whereClause,
       orderBy: { date: 'desc' }
     })
     

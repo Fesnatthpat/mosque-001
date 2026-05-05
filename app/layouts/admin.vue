@@ -21,8 +21,8 @@
         <div class="flex items-center gap-3 mb-2">
           <div class="w-11 h-11 bg-emerald-500 rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-emerald-500/30">🕌</div>
           <div>
-            <h1 class="font-bold text-lg leading-tight tracking-wide">Mosque Admin</h1>
-            <p class="text-[10px] text-slate-400 font-medium mt-0.5 uppercase tracking-widest">Management System</p>
+            <h1 class="font-bold text-lg leading-tight tracking-wide">มัสยิดบ้านสมเด็จ</h1>
+            <p class="text-[10px] text-slate-400 font-medium mt-0.5 uppercase tracking-widest">จัดการระบบ</p>
           </div>
         </div>
       </div>

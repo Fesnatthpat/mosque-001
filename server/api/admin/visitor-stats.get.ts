@@ -12,10 +12,23 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    const query = getQuery(event)
+    const filterMonth = query.month ? parseInt(query.month as string) : null
+    const filterYear = query.year ? parseInt(query.year as string) : null
+
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const last7Days = new Date(today)
-    last7Days.setDate(last7Days.getDate() - 7)
+    
+    // Default range for chart: last 7 days
+    let chartStartDate = new Date(today)
+    chartStartDate.setDate(chartStartDate.getDate() - 7)
+    let chartEndDate = new Date(now)
+
+    // If month/year filter is provided, change chart range to that month
+    if (filterMonth !== null && filterYear !== null) {
+      chartStartDate = new Date(filterYear, filterMonth - 1, 1)
+      chartEndDate = new Date(filterYear, filterMonth, 0, 23, 59, 59)
+    }
 
     const [totalVisits, todayVisits, topPages, recentVisitors] = await Promise.all([
       prisma.visitorLog.count(),
@@ -28,6 +41,12 @@ export default defineEventHandler(async (event) => {
       }),
       prisma.visitorLog.groupBy({
         by: ['path'],
+        where: (filterMonth !== null && filterYear !== null) ? {
+          createdAt: {
+            gte: chartStartDate,
+            lte: chartEndDate
+          }
+        } : undefined,
         _count: {
           path: true
         },
@@ -39,6 +58,12 @@ export default defineEventHandler(async (event) => {
         take: 10
       }),
       prisma.visitorLog.findMany({
+        where: (filterMonth !== null && filterYear !== null) ? {
+          createdAt: {
+            gte: chartStartDate,
+            lte: chartEndDate
+          }
+        } : undefined,
         orderBy: {
           createdAt: 'desc'
         },
@@ -46,7 +71,7 @@ export default defineEventHandler(async (event) => {
       })
     ])
 
-    // Fetch recent stats and cast to expected format
+    // Fetch stats for the chart range
     let recentStats = []
     try {
       const rawStats = await prisma.$queryRaw`
@@ -54,7 +79,7 @@ export default defineEventHandler(async (event) => {
           CAST("createdAt" AS DATE) as date, 
           COUNT(*)::int as count 
         FROM "VisitorLog" 
-        WHERE "createdAt" >= ${last7Days}
+        WHERE "createdAt" >= ${chartStartDate} AND "createdAt" <= ${chartEndDate}
         GROUP BY CAST("createdAt" AS DATE)
         ORDER BY date ASC
       `
@@ -68,7 +93,11 @@ export default defineEventHandler(async (event) => {
       todayVisits,
       recentStats,
       topPages,
-      recentVisitors
+      recentVisitors,
+      period: {
+        start: chartStartDate,
+        end: chartEndDate
+      }
     }
   } catch (error: any) {
     console.error('[Stats API] Main Error:', error)

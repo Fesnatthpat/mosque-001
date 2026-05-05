@@ -1,12 +1,18 @@
 export default defineEventHandler(async (event) => {
     try {
+        const query = getQuery(event);
+        const now = new Date();
+        const dd = query.dd || now.getDate();
+        const mm = query.mm || (now.getMonth() + 1);
+        const yyyy = query.yyyy || now.getFullYear();
+
         const response = await fetch('https://prayertimes.muslimthaipost.com/app_crud.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             },
-            body: 'action=getsolatbyprovince&id=2' // Bangkok
+            body: `action=getsolatbyprovince&id=2&dd=${dd}&mm=${mm}&yyyy=${yyyy}`
         });
 
         const data = await response.json();
@@ -33,7 +39,7 @@ export default defineEventHandler(async (event) => {
         }
 
         return { success: false, error: 'Failed to fetch prayer times' };
-    } catch (error) {
+    } catch (error: any) {
         return { success: false, error: error.message };
     }
 });

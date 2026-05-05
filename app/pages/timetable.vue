@@ -1,12 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const { data: settings } = await useFetch('/api/admin/settings')
-const { data: prayerData } = await useFetch('/api/prayer-times')
+const selectedDate = ref(new Date().toISOString().split('T')[0])
 
-// 1. เพิ่มตัวแปรสำหรับดึงวันที่ปัจจุบันและจัดรูปแบบเป็นภาษาไทย
-const currentDate = computed(() => {
-    const date = new Date()
+const { data: settings } = await useFetch('/api/admin/settings')
+const { data: prayerData, pending } = await useFetch('/api/prayer-times', {
+    query: computed(() => {
+        const d = new Date(selectedDate.value)
+        return {
+            dd: d.getDate(),
+            mm: d.getMonth() + 1,
+            yyyy: d.getFullYear()
+        }
+    })
+})
+
+// 1. เพิ่มตัวแปรสำหรับดึงวันที่และจัดรูปแบบเป็นภาษาไทย
+const displayDateThai = computed(() => {
+    const date = new Date(selectedDate.value)
     return date.toLocaleDateString('th-TH', {
         weekday: 'long',  // แสดงชื่อวัน (เช่น วันจันทร์)
         year: 'numeric',  // แสดงปี พ.ศ. เต็ม
@@ -18,7 +29,7 @@ const currentDate = computed(() => {
 const timetables = computed(() => {
     if (prayerData.value?.success) {
         return [{
-            date_header: 'ประจำ' + currentDate.value,
+            date_header: 'ประจำ' + displayDateThai.value,
             fajr: prayerData.value.times.fajr,
             sunrise: prayerData.value.times.sunrise,
             dhuhr: prayerData.value.times.dhuhr,
@@ -29,7 +40,7 @@ const timetables = computed(() => {
     }
 
     return [{
-        date_header: 'ประจำ' + currentDate.value,
+        date_header: 'ประจำ' + displayDateThai.value,
         fajr: '05:00',
         sunrise: '06:15',
         dhuhr: '12:30',
@@ -57,13 +68,24 @@ const getPrayers = (table: any) => [
             <div class="text-center mb-12">
                 <h1 class="text-4xl md:text-5xl font-black text-[#155d3a] mb-4 uppercase tracking-tighter">ตารางเวลาละหมาด</h1>
                 <div class="w-24 h-1.5 bg-[#facc15] mx-auto rounded-full mb-6"></div>
-                <p class="text-slate-500 font-medium">{{ settings?.mosque_name || 'มัสยิดบ้านสมเด็จ' }}</p>
+                <p class="text-slate-500 font-medium mb-10">{{ settings?.mosque_name || 'มัสยิดบ้านสมเด็จ' }}</p>
+
+                <!-- Date Picker -->
+                <div class="inline-flex items-center gap-4 bg-white px-6 py-4 rounded-[2rem] shadow-sm border border-slate-100 mb-8 hover:shadow-md transition-all">
+                    <span class="text-sm font-bold text-slate-400 uppercase tracking-widest">เลือกวันที่:</span>
+                    <input 
+                        v-model="selectedDate" 
+                        type="date" 
+                        class="bg-transparent font-black text-[#155d3a] outline-none cursor-pointer text-lg"
+                    />
+                    <div v-if="pending" class="w-5 h-5 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
+                </div>
             </div>
 
             <!-- 3. ส่วนของตารางแสดงผล -->
             <div v-for="(table, tIdx) in timetables" :key="tIdx" class="mb-12 last:mb-0">
                 <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-[#155d3a]">{{ table.date_header || 'ประจำ' + currentDate }}</h2>
+                    <h2 class="text-2xl font-bold text-[#155d3a]">{{ table.date_header }}</h2>
                 </div>
 
                 <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
