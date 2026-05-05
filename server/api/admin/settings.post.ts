@@ -1,7 +1,17 @@
 import { prisma } from '../../utils/prisma'
+import { serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
   try {
+    // Check Authentication
+    const user = await serverSupabaseUser(event)
+    if (!user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Unauthorized'
+      })
+    }
+
     const body = await readBody(event)
     const { key, value } = body
     
@@ -14,8 +24,8 @@ export default defineEventHandler(async (event) => {
     return setting
   } catch (error: any) {
     throw createError({
-      statusCode: 500,
-      statusMessage: error.message
+      statusCode: error.statusCode || 500,
+      statusMessage: error.message || 'Internal Server Error'
     })
   }
 })

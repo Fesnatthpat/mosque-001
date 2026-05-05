@@ -1,7 +1,17 @@
 import { prisma } from '../../utils/prisma'
+import { serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
   try {
+    // Check Authentication
+    const user = await serverSupabaseUser(event)
+    if (!user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Unauthorized'
+      })
+    }
+
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     const last7Days = new Date(today)
@@ -60,15 +70,11 @@ export default defineEventHandler(async (event) => {
       topPages,
       recentVisitors
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Stats API] Main Error:', error)
-    return {
-      totalVisits: 0,
-      todayVisits: 0,
-      recentStats: [],
-      topPages: [],
-      recentVisitors: [],
-      error: error.message
-    }
+    throw createError({
+      statusCode: error.statusCode || 500,
+      statusMessage: error.message || 'Internal Server Error'
+    })
   }
 })

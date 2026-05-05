@@ -1,15 +1,9 @@
+import { prisma } from '../utils/prisma'
+
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
     const { amount, donorName, donorEmail, donorPhone, blessing, slipUrl, taxId, address } = body
-
-    const { PrismaClient } = await import('@prisma/client')
-    const { PrismaPg } = await import('@prisma/adapter-pg')
-    const pg = await import('pg')
-
-    const pool = new pg.default.Pool({ connectionString: process.env.DATABASE_URL })
-    const adapter = new PrismaPg(pool)
-    const prisma = new PrismaClient({ adapter })
 
     try {
       const donation = await prisma.donation.create({
@@ -26,13 +20,17 @@ export default defineEventHandler(async (event) => {
         }
       })
       return { success: true, donation }
-    } finally {
-      await prisma.$disconnect()
+    } catch (dbError: any) {
+      console.error('[Donation API] Database Error:', dbError)
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'ไม่สามารถบันทึกข้อมูลการบริจาคได้ กรุณาลองใหม่อีกครั้ง'
+      })
     }
   } catch (error: any) {
     throw createError({
-      statusCode: 500,
-      statusMessage: error.message
+      statusCode: error.statusCode || 500,
+      statusMessage: error.message || 'Internal Server Error'
     })
   }
 })

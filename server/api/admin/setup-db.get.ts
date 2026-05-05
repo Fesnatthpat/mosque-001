@@ -1,7 +1,17 @@
 import { prisma } from '../../utils/prisma'
+import { serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
   try {
+    // Check Authentication
+    const user = await serverSupabaseUser(event)
+    if (!user) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Unauthorized'
+      })
+    }
+
     const count = await prisma.donation.count()
     
     const sampleDonations = [

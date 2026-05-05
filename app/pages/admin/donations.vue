@@ -29,7 +29,16 @@
                 <td class="px-8 py-6">
                   <div>
                     <p class="font-bold text-slate-800">{{ donation.donorName || 'ผู้ไม่ประสงค์ออกนาม' }}</p>
-                    <p class="text-[11px] text-slate-400 mt-1 italic leading-relaxed max-w-[200px] truncate"
+                    <div class="flex flex-wrap gap-2 mt-1">
+                      <p v-if="donation.donorPhone" class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full text-slate-500 font-bold">📞 {{ donation.donorPhone }}</p>
+                      <p v-if="donation.donorEmail" class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full text-slate-500 font-bold">📧 {{ donation.donorEmail }}</p>
+                    </div>
+                    <div v-if="donation.taxId" class="mt-2 p-2 bg-emerald-50 rounded-lg border border-emerald-100">
+                       <p class="text-[9px] font-black text-emerald-600 uppercase tracking-tighter mb-0.5">ข้อมูลใบกำกับภาษี</p>
+                       <p class="text-[10px] text-emerald-700 font-bold">เลขผู้เสียภาษี: {{ donation.taxId }}</p>
+                       <p v-if="donation.address" class="text-[10px] text-emerald-600/70 mt-0.5 leading-tight">{{ donation.address }}</p>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2 italic leading-relaxed max-w-[200px] truncate"
                       :title="donation.blessing">{{ donation.blessing || 'ไม่มีคำอวยพร' }}</p>
                   </div>
                 </td>
