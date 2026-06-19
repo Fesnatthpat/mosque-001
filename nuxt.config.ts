@@ -50,9 +50,7 @@ export default defineNuxtConfig({
       callback: '/confirm',   // จุดตรวจสอบสัญญานล็อกอินย้อนกลับ
       // รายชื่อหน้าเว็บที่อนุญาตให้คนทั่วไปเข้าใช้งานได้ โดยไม่ต้องแจ้งล็อกอิน
       exclude: ['/', '/history', '/timetable', '/activities', '/donate', '/api/**'],
-    },
-    url: process.env.SUPABASE_URL,
-    key: process.env.SUPABASE_KEY
+    }
   },
   
   // ตั้งค่าดึงฟอนต์ "Prompt" จาก Google Fonts มาติดตั้งใช้งานในเครื่องทันทีเพื่อความเร็ว

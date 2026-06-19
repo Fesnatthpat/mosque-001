@@ -4,7 +4,7 @@
     <NuxtLayout name="admin">
       
       <!-- ==================== 1. Header (ชื่อหน้าหลักและคำโปรย) ==================== -->
-      <div class="mb-8 flex justify-between items-end">
+      <div class="mb-8 flex justify-between items-end print:hidden">
         <div>
           <h3 class="text-3xl font-black text-slate-800 mb-2">ตรวจสอบการโอนเงิน</h3>
           <p class="text-slate-500">ตรวจสอบหลักฐานและยืนยันยอดเงินบริจาคจากผู้มีจิตศรัทธา</p>
@@ -12,7 +12,7 @@
       </div>
 
       <!-- ==================== 2. Donations Management Table (ตารางจัดการรายการบริจาค) ==================== -->
-      <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100">
+      <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 print:hidden">
         <div class="overflow-x-auto overflow-y-visible">
           <table class="w-full text-left border-collapse text-sm">
             <thead>
@@ -42,11 +42,20 @@
                       <p v-if="donation.donorEmail" class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full text-slate-500 font-bold">📧 {{ donation.donorEmail }}</p>
                     </div>
 
-                    <!-- แสดงกล่องที่อยู่รับใบกำกับภาษี/ลดหย่อนภาษีกรณีที่ผู้ใช้แจ้งขอข้อมูลมา -->
-                    <div v-if="donation.taxId" class="mt-2 p-2 bg-emerald-50 rounded-lg border border-emerald-100">
-                       <p class="text-[9px] font-black text-emerald-600 uppercase tracking-tighter mb-0.5">ข้อมูลใบกำกับภาษี</p>
-                       <p class="text-[10px] text-emerald-700 font-bold">เลขผู้เสียภาษี: {{ donation.taxId }}</p>
-                       <p v-if="donation.address" class="text-[10px] text-emerald-600/70 mt-0.5 leading-tight">{{ donation.address }}</p>
+                    <!-- สถานะการขอใบกำกับภาษี -->
+                    <div class="mt-3 flex flex-col items-start gap-2">
+                      <span v-if="donation.taxId" class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-md text-[10px] font-bold">
+                        <span>📑</span> ขอใบกำกับภาษี
+                      </span>
+                      <span v-else class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 text-slate-400 border border-slate-200 rounded-md text-[10px] font-bold">
+                        <span>❌</span> ไม่ขอรับใบกำกับภาษี
+                      </span>
+
+                      <!-- แสดงรายละเอียดที่อยู่รับใบกำกับภาษีกรณีที่ร้องขอ -->
+                      <div v-if="donation.taxId" class="w-full p-2.5 bg-amber-50/40 rounded-lg border border-amber-100">
+                         <p class="text-[10px] text-amber-700 font-bold leading-tight">เลขผู้เสียภาษี: {{ donation.taxId }}</p>
+                         <p v-if="donation.address" class="text-[10px] text-amber-600/70 mt-1 leading-tight">{{ donation.address }}</p>
+                      </div>
                     </div>
                     
                     <!-- คำอวยพร/คำดุอาอ์จากผู้ร่วมทำบุญ -->
@@ -98,6 +107,11 @@
                       class="px-4 py-2 bg-slate-200 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-50 hover:text-rose-600 transition-all active:scale-95">
                       ยกเลิก
                     </button>
+                    <!-- ปุ่มพิมพ์ใบกำกับภาษี -->
+                    <button v-if="donation.taxId" @click="printInvoice(donation)"
+                      class="px-4 py-2 bg-amber-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/10 active:scale-95 flex items-center gap-1.5 ml-2">
+                      <span>🖨️</span> พิมพ์
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -113,6 +127,66 @@
           </table>
         </div>
       </div>
+
+      <!-- ==================== 4. Print Template for Tax Invoice (แสดงเฉพาะตอนพิมพ์) ==================== -->
+      <div class="hidden print:block w-full max-w-lg mx-auto mt-10 font-['Prompt']">
+        <!-- ส่วนหัวที่จะแสดงเฉพาะเวลาที่กดสั่งพิมพ์กระดาษออกมาเท่านั้น (Hidden in Web View, Visible in Printing) -->
+        <div class="p-8 text-center border-b-2 border-emerald-500">
+            <h1 class="text-2xl font-black text-emerald-700 uppercase">ใบกำกับภาษี / ใบเสร็จรับเงิน</h1>
+            <p class="text-sm font-bold text-slate-500">มัสยิดนูรุ้ลมู่บิน</p>
+        </div>
+
+        <div class="p-6 md:p-8 text-center" v-if="selectedInvoice">
+            <h3 class="text-xl md:text-2xl font-black text-slate-800 mb-1">หลักฐานการรับเงิน</h3>
+            <p class="text-sm md:text-base text-slate-500 font-medium mb-6">ขออัลลอฮ์ทรงตอบแทนความดีงามแก่ท่าน</p>
+
+            <!-- ดีเทลรายการสรุปยอดบิลบริจาค -->
+            <div class="bg-white text-left space-y-3">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">เลขที่อ้างอิง</span>
+                    <span class="text-sm font-bold text-slate-700 font-mono">#{{ selectedInvoice.id.toString().padStart(6, '0').slice(0, 8).toUpperCase() }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-xs font-bold text-slate-400">ชื่อผู้บริจาค:</span>
+                    <span class="text-sm font-bold text-slate-700">{{ selectedInvoice.donorName || 'ผู้ไม่ประสงค์ออกนาม' }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-400">จำนวนเงิน:</span>
+                    <div class="text-right">
+                      <span class="text-lg font-black text-emerald-600">{{ selectedInvoice.amount.toLocaleString() }} บาท</span>
+                      <p class="text-[10px] text-emerald-600/80 font-bold mt-0.5">({{ bahtText(selectedInvoice.amount) }})</p>
+                    </div>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-xs font-bold text-slate-400">วันที่:</span>
+                    <span class="text-sm font-bold text-slate-700">{{ new Date(selectedInvoice.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) }}</span>
+                </div>
+                <div v-if="selectedInvoice.taxId" class="flex justify-between pt-3 border-t border-dashed border-slate-100">
+                    <span class="text-xs font-bold text-slate-400">เลขผู้เสียภาษี:</span>
+                    <span class="text-sm font-bold text-slate-700">{{ selectedInvoice.taxId }}</span>
+                </div>
+                <div v-if="selectedInvoice.address" class="flex justify-between pt-1">
+                    <span class="text-xs font-bold text-slate-400 w-1/3">ที่อยู่:</span>
+                    <span class="text-sm font-bold text-slate-700 text-right w-2/3">{{ selectedInvoice.address }}</span>
+                </div>
+                
+                <!-- แนบภาพสลิปประกอบบิลเพื่อใช้อ้างอิงการตรวจสอบ -->
+                <div class="pt-4 border-t border-slate-100 mt-4">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">หลักฐานการโอนเงิน</p>
+                    <div class="w-full h-48 bg-white rounded-xl overflow-hidden border border-slate-200">
+                        <img :src="selectedInvoice.slipUrl" class="w-full h-full object-contain" alt="สลิปการโอนเงิน" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- คำลงท้ายบิลที่พิมพ์ -->
+            <div class="mt-12 text-center text-[10px] text-slate-400 italic leading-relaxed">
+                * เอกสารนี้เป็นเพียงหลักฐานการแจ้งบริจาคเบื้องต้น *<br/>
+                <span class="font-bold text-red-500">* หมายเหตุ: ใบกำกับภาษีฉบับจริงจะถูกจัดส่งทางไปรษณีย์ภายใน 7-14 วันทำการ</span>
+            </div>
+        </div>
+      </div>
+
     </NuxtLayout>
 
     <!-- ==================== 3. Hover Preview Tooltip (ฟลอยท์กล่องเล็กรูปสลิปขยายเมื่อชี้เมาส์) ==================== -->
@@ -218,5 +292,38 @@ async function updateStatus(id, status) {
   } catch (error) {
     alert('เกิดข้อผิดพลาด: ' + error.message)
   }
+}
+
+// === ระบบพิมพ์ใบกำกับภาษีรายบุคคล ===
+const selectedInvoice = ref(null)
+
+// ฟังก์ชันแปลงตัวเลขเป็นคำอ่านภาษาไทย (บาทถ้วน)
+const bahtText = (amount) => {
+  if (!amount) return 'ศูนย์บาทถ้วน'
+  let numStr = Math.floor(amount).toString()
+  const unit = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน']
+  const text = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า']
+  let result = ''
+  for (let i = 0; i < numStr.length; i++) {
+    let n = parseInt(numStr[i])
+    let u = numStr.length - 1 - i
+    if (n !== 0) {
+      if (u === 1 && n === 1) { /* สิบ */ }
+      else if (u === 1 && n === 2) { result += 'ยี่' }
+      else if (u === 0 && n === 1 && numStr.length > 1 && parseInt(numStr[numStr.length-2]) !== 0) { result += 'เอ็ด' }
+      else { result += text[n] }
+      result += unit[u]
+    }
+  }
+  return result + 'บาทถ้วน'
+}
+
+function printInvoice(donation) {
+  selectedInvoice.value = donation
+  
+  // หน่วงเวลาเล็กน้อยให้ Vue เรนเดอร์เทมเพลตสำหรับพิมพ์ (Print Template) ก่อนเรียก window.print()
+  setTimeout(() => {
+    window.print()
+  }, 300)
 }
 </script>

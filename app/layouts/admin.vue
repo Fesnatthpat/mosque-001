@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-slate-50 flex font-['Prompt'] text-slate-800">
     
     <!-- ==================== 1. Mobile Header (แถบเมนูด้านบนเฉพาะมือถือ - ซ่อนบนจอคอม) ==================== -->
-    <header class="lg:hidden fixed top-0 left-0 w-full bg-slate-900 text-white h-16 flex items-center justify-between px-6 z-[100] shadow-lg">
+    <header class="lg:hidden fixed top-0 left-0 w-full bg-slate-900 text-white h-16 flex items-center justify-between px-6 z-[100] shadow-lg print:hidden">
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-lg">🕌</div>
         <span class="font-bold text-sm tracking-tight">Mosque Admin</span>
@@ -16,7 +16,7 @@
 
     <!-- ==================== 2. Sidebar (แถบควบคุมเมนูด้านซ้าย สำหรับคอมและสไลด์บนมือถือ) ==================== -->
     <aside 
-      class="fixed inset-y-0 left-0 w-72 bg-slate-900 text-white shadow-2xl z-[90] transition-transform duration-300 lg:translate-x-0 lg:static lg:flex lg:flex-col"
+      class="fixed inset-y-0 left-0 w-72 bg-slate-900 text-white shadow-2xl z-[90] transition-transform duration-300 lg:translate-x-0 lg:static lg:flex lg:flex-col print:hidden"
       :class="isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'"
     >
       <!-- โลโก้แอดมิน (แสดงบนจอคอมพิวเตอร์) -->
@@ -88,10 +88,10 @@
     ></div>
 
     <!-- ==================== 3. Main Content (ส่วนแสดงเนื้อหาฟังก์ชั่นหลักหลังบ้าน) ==================== -->
-    <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden pt-16 lg:pt-0">
+    <main class="flex-1 flex flex-col min-w-0 h-screen print:h-auto overflow-hidden print:overflow-visible pt-16 lg:pt-0">
       
       <!-- แถบหัวข้อย่อยด้านบนของแต่ละหน้าของหลังบ้าน (แสดงเฉพาะจอคอม) -->
-      <header class="hidden lg:flex h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 items-center justify-between sticky top-0 z-10">
+      <header class="hidden lg:flex h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 items-center justify-between sticky top-0 z-10 print:hidden">
         <h2 class="text-xl font-bold text-slate-800 tracking-tight">{{ pageTitle }}</h2>
         <div class="flex items-center gap-4">
           <div class="px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-200 flex items-center gap-1.5 uppercase tracking-tighter">

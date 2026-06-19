@@ -144,6 +144,27 @@ function printTaxInvoice() {
         window.print()
     }, 500)
 }
+
+// ฟังก์ชันแปลงตัวเลขเป็นคำอ่านภาษาไทย (บาทถ้วน)
+const bahtText = (amount) => {
+  if (!amount) return 'ศูนย์บาทถ้วน'
+  let numStr = Math.floor(amount).toString()
+  const unit = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน']
+  const text = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า']
+  let result = ''
+  for (let i = 0; i < numStr.length; i++) {
+    let n = parseInt(numStr[i])
+    let u = numStr.length - 1 - i
+    if (n !== 0) {
+      if (u === 1 && n === 1) { /* สิบ */ }
+      else if (u === 1 && n === 2) { result += 'ยี่' }
+      else if (u === 0 && n === 1 && numStr.length > 1 && parseInt(numStr[numStr.length-2]) !== 0) { result += 'เอ็ด' }
+      else { result += text[n] }
+      result += unit[u]
+    }
+  }
+  return result + 'บาทถ้วน'
+}
 </script>
 
 <template>
@@ -364,8 +385,8 @@ function printTaxInvoice() {
                     
                     <!-- ส่วนหัวที่จะแสดงเฉพาะเวลาที่กดสั่งพิมพ์กระดาษออกมาเท่านั้น (Hidden in Web View, Visible in Printing) -->
                     <div class="hidden print:block p-8 text-center border-b-2 border-emerald-500">
-                        <h1 class="text-2xl font-black text-emerald-700 uppercase">{{ isPrintTaxMode ? 'ใบกำกับภาษี (ชั่วคราว)' : 'ใบเสร็จรับเงิน/หลักฐานการบริจาค' }}</h1>
-                        <p class="text-sm font-bold text-slate-500">มัสยิดบ้านสมเด็จ (Bang Somdet Mosque)</p>
+                        <h1 class="text-2xl font-black text-emerald-700 uppercase">{{ isPrintTaxMode ? 'ใบกำกับภาษี / ใบเสร็จรับเงิน' : 'ใบเสร็จรับเงิน/หลักฐานการบริจาค' }}</h1>
+                        <p class="text-sm font-bold text-slate-500">มัสยิดนูรุ้ลมู่บิน</p>
                     </div>
 
                     <div class="p-6 md:p-8 text-center mt-6 md:mt-0">
@@ -386,9 +407,12 @@ function printTaxInvoice() {
                                 <span class="text-xs font-bold text-slate-400">ชื่อผู้บริจาค:</span>
                                 <span class="text-sm font-bold text-slate-700">{{ donationResult?.donorName || 'ผู้ไม่ประสงค์ออกนาม' }}</span>
                             </div>
-                            <div class="flex justify-between">
+                            <div class="flex justify-between items-center">
                                 <span class="text-xs font-bold text-slate-400">จำนวนเงิน:</span>
-                                <span class="text-lg font-black text-emerald-600">{{ donationResult?.amount?.toLocaleString() }} บาท</span>
+                                <div class="text-right">
+                                  <span class="text-lg font-black text-emerald-600">{{ donationResult?.amount?.toLocaleString() }} บาท</span>
+                                  <p class="text-[10px] text-emerald-600/80 font-bold mt-0.5" v-if="donationResult?.amount">({{ bahtText(donationResult?.amount) }})</p>
+                                </div>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-xs font-bold text-slate-400">วันที่:</span>
@@ -416,6 +440,7 @@ function printTaxInvoice() {
                             <button v-if="donationResult?.taxId" @click="printTaxInvoice" class="w-full py-4 bg-amber-500 text-white font-black rounded-2xl shadow-xl hover:bg-amber-600 transition-all flex items-center justify-center gap-2">
                                 <span>📑</span> พิมพ์ใบกำกับภาษี (ชั่วคราว)
                             </button>
+                            <div class="text-red-500 text-sm font-bold">* หมายเหตุ: ใบกำกับภาษีฉบับจริงจะถูกจัดส่งทางไปรษณีย์ภายใน 7-14 วันทำการ</div>
                             <button @click="showSuccessModal = false" class="w-full py-4 bg-emerald-50 text-emerald-600 font-bold rounded-2xl hover:bg-emerald-100 transition-all">
                                 กลับสู่หน้าหลัก
                             </button>

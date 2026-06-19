@@ -3,6 +3,8 @@
     <!-- ใช้ Layout ของส่วนแอดมิน (มีแถบด้านข้าง Sidebar) -->
     <NuxtLayout name="admin">
       
+      <!-- ห่อหุ้มเนื้อหาทั้งหมดที่ต้องการพิมพ์ใน PDF -->
+      <div id="report-content" class="bg-[#f8fafc] p-4 md:p-8 rounded-[2.5rem]">
       <!-- ==================== 1. Header with Filters (ส่วนหัวและตัวเลือกฟิลเตอร์) ==================== -->
       <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -26,8 +28,14 @@
             </select>
           </div>
           <!-- ปุ่มกดรีเฟรชข้อมูล (มีการใส่ Micro-animation ให้หมุนขณะรอโหลดข้อมูล) -->
-          <button @click="refresh()" class="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400">
+          <button @click="refresh()" class="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400 print:hidden" title="รีเฟรชข้อมูล">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" :class="{ 'animate-spin': pending }"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
+          </button>
+          
+          <!-- ปุ่ม Export Excel -->
+          <button @click="exportToExcel()" class="p-2 hover:bg-emerald-50 rounded-xl transition-colors text-emerald-600 border-l border-slate-100 flex items-center gap-1 px-3 print:hidden" title="ดาวน์โหลดรายงานเป็น Excel (CSV)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M8 13h2"></path><path d="M8 17h2"></path><path d="M14 13h2"></path><path d="M14 17h2"></path></svg>
+            <span class="text-[10px] font-black uppercase tracking-widest hidden md:inline">Export Excel</span>
           </button>
         </div>
       </div>
@@ -54,7 +62,7 @@
         </div>
 
       <!-- Floating Database Status -->
-      <div class="fixed bottom-4 right-4 bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 flex items-center gap-2 z-50">
+      <div class="fixed bottom-4 right-4 bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 flex items-center gap-2 z-50 print:hidden">
         <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
         <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">DB: Connected</div>
       </div>
@@ -110,6 +118,7 @@
           </table>
         </div>
       </div>
+      </div>
     </NuxtLayout>
   </div>
 </template>
@@ -154,4 +163,44 @@ const years = computed(() => {
   const currentYear = new Date().getFullYear()
   return [currentYear, currentYear - 1, currentYear - 2]
 })
+
+// ฟังก์ชันสร้างและดาวน์โหลดไฟล์รายงานสำหรับ Excel (CSV)
+const exportToExcel = () => {
+  if (!process.client || !data.value?.donations) return
+  
+  // ใส่ BOM (\uFEFF) ไว้ด้านหน้าสุดเพื่อให้ Excel อ่านภาษาไทย (UTF-8) ได้ถูกต้อง
+  let csvContent = "\uFEFFผู้บริจาค,จำนวนเงิน,วันที่,สถานะ\n"
+  
+  // วนลูปสร้างแถวข้อมูลจากรายการบริจาค
+  data.value.donations.forEach(donation => {
+    const name = donation.donorName || 'ผู้ไม่ประสงค์ออกนาม'
+    const amount = donation.amount
+    const date = new Date(donation.date).toLocaleDateString('th-TH')
+    const status = donation.status === 'completed' ? 'สำเร็จ' : 'รอดำเนินการ'
+    
+    csvContent += `"${name}","${amount}","${date}","${status}"\n`
+  })
+  
+  // เพิ่มบรรทัดเว้นวรรค
+  csvContent += `\n`
+  
+  // เพิ่มสรุปยอดรวมที่ด้านล่างของไฟล์
+  const totalItems = data.value.donations.length
+  const totalAmount = data.value.totalAmount || 0
+  csvContent += `"รวมจำนวนรายการ","${totalItems} รายการ"\n`
+  csvContent += `"รวมยอดเงินบริจาคทั้งหมด","${totalAmount.toLocaleString()} บาท"\n`
+  
+  // สร้างไฟล์ Blob และลิงก์สำหรับดาวน์โหลด
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  
+  const link = document.createElement("a")
+  link.setAttribute("href", url)
+  link.setAttribute("download", `dashboard-report-${selectedMonth.value}-${selectedYear.value}.csv`)
+  link.style.visibility = 'hidden'
+  
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
 </script>
