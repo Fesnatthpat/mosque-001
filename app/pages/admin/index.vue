@@ -41,7 +41,7 @@
       </div>
 
       <!-- ==================== 2. Stats Overview Cards (การ์ดสรุปตัวเลขสถิติ) ==================== -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
         
         <!-- การ์ดยอดบริจาครวมประจำเดือน -->
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-between">
@@ -55,10 +55,28 @@
         <!-- การ์ดจำนวนรายการแจ้งบริจาค -->
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-between">
           <div>
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">จำนวนรายการ</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">จำนวนรายการรวม</div>
             <div class="text-3xl font-black text-slate-800 tracking-tight">{{ data?.donations?.length || 0 }} รายการ</div>
           </div>
-          <div class="mt-4 text-[10px] text-blue-500 font-bold uppercase tracking-tighter">รวมรายการรอยืนยัน</div>
+          <div class="mt-4 text-[10px] text-blue-500 font-bold uppercase tracking-tighter">ทุกสถานะ</div>
+        </div>
+
+        <!-- การ์ดรายการที่ยืนยันแล้ว -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">ยืนยันแล้ว</div>
+            <div class="text-3xl font-black text-emerald-500 tracking-tight">{{ completedCount }} รายการ</div>
+          </div>
+          <div class="mt-4 text-[10px] text-emerald-400 font-bold uppercase tracking-tighter">โอนเงินเรียบร้อย</div>
+        </div>
+
+        <!-- การ์ดรายการที่รอดำเนินการ -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">รอดำเนินการ</div>
+            <div class="text-3xl font-black text-amber-500 tracking-tight">{{ pendingCount }} รายการ</div>
+          </div>
+          <div class="mt-4 text-[10px] text-amber-400 font-bold uppercase tracking-tighter">รอการตรวจสอบ</div>
         </div>
 
       <!-- Floating Database Status -->
@@ -162,6 +180,17 @@ const months = [
 const years = computed(() => {
   const currentYear = new Date().getFullYear()
   return [currentYear, currentYear - 1, currentYear - 2]
+})
+
+// คำนวณจำนวนรายการแต่ละสถานะ
+const completedCount = computed(() => {
+  if (!data.value?.donations) return 0
+  return data.value.donations.filter(d => d.status === 'completed').length
+})
+
+const pendingCount = computed(() => {
+  if (!data.value?.donations) return 0
+  return data.value.donations.filter(d => d.status === 'pending').length
 })
 
 // ฟังก์ชันสร้างและดาวน์โหลดไฟล์รายงานสำหรับ Excel (CSV)

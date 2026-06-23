@@ -360,9 +360,6 @@ const bahtText = (amount) => {
                         </div>
 
                         <!-- กลุ่มปุ่มตัดสินใจ -->
-                        <div class="mt-4 text-xs text-rose-500 font-bold mb-4">
-                            * หมายเหตุ: ใบกำกับภาษีฉบับจริงจะถูกจัดส่งทางไปรษณีย์ภายใน 7-14 วันทำการ
-                        </div>
                         <div class="mt-4 flex gap-4">
                             <button @click="showTaxModal = false" class="flex-1 py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-all">ยกเลิก</button>
                             <button @click="form.requestTaxInvoice = true; showTaxModal = false" class="flex-1 py-4 bg-emerald-500 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all">บันทึกข้อมูล</button>
@@ -379,29 +376,121 @@ const bahtText = (amount) => {
                 <div class="absolute inset-0 bg-emerald-900/40 backdrop-blur-md"></div>
                 
                 <!-- ตัวกล่องเอกสารหลักใบแจ้งยอดใบเสร็จ -->
-                <div class="bg-white w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-2xl relative overflow-y-auto max-h-[85vh] print:shadow-none print:m-0 print:overflow-visible print:max-h-none">
+                <div class="bg-white w-full max-w-lg rounded-[2.5rem] md:rounded-[3rem] shadow-2xl relative overflow-y-auto max-h-[85vh] print:shadow-none print:m-0 print:overflow-visible print:max-h-none print:max-w-3xl print:bg-transparent print:rounded-none">
                     <!-- ปุ่มกากบาทปิดหน้าต่าง (Close Button) -->
                     <button @click="showSuccessModal = false" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center hover:bg-slate-200 transition-all z-10 print:hidden font-bold">✕</button>
                     
                     <!-- ส่วนหัวที่จะแสดงเฉพาะเวลาที่กดสั่งพิมพ์กระดาษออกมาเท่านั้น (Hidden in Web View, Visible in Printing) -->
-                    <div class="hidden print:block p-8 text-center border-b-2 border-emerald-500">
-                        <h1 class="text-2xl font-black text-emerald-700 uppercase">{{ isPrintTaxMode ? 'ใบกำกับภาษี / ใบเสร็จรับเงิน' : 'ใบเสร็จรับเงิน/หลักฐานการบริจาค' }}</h1>
-                        <p class="text-sm font-bold text-slate-500">มัสยิดนูรุ้ลมู่บิน</p>
+                    <div class="hidden print:block w-full max-w-3xl mx-auto mt-4 font-['Prompt'] bg-[#ffcce6] p-10 border-2 border-slate-800 relative" style="-webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                        <!-- Corner decorations -->
+                        <div class="absolute top-2 left-2 w-12 h-12 border-t-2 border-l-2 border-slate-800 rounded-tl-2xl"></div>
+                        <div class="absolute top-2 right-2 w-12 h-12 border-t-2 border-r-2 border-slate-800 rounded-tr-2xl"></div>
+                        <div class="absolute bottom-2 left-2 w-12 h-12 border-b-2 border-l-2 border-slate-800 rounded-bl-2xl"></div>
+                        <div class="absolute bottom-2 right-2 w-12 h-12 border-b-2 border-r-2 border-slate-800 rounded-br-2xl"></div>
+
+                        <div class="flex justify-end items-start text-slate-900 font-bold text-sm mb-4">
+                            <div class="flex items-end">
+                                <span class="mr-2">เลขที่</span>
+                                <span class="border-b border-dotted border-slate-800 inline-block w-32 text-center text-lg font-mono">{{ donationResult?.id?.toString().padStart(4, '0') || '----' }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Logo and Header -->
+                        <div class="text-center mt-2 mb-8 relative">
+                            <h1 class="text-4xl font-black text-slate-900 mb-2" style="font-family: serif; letter-spacing: 1px;">มัสยิดนูรุ้ลมูบีน</h1>
+                            <p class="text-sm text-slate-900 font-medium">1134 ซอยอิสรภาพ 9 ถนนอิสรภาพ<br/>เขตธนบุรี กรุงเทพมหานคร 10600</p>
+                            
+                            <div class="my-3 border-b-2 border-slate-800 w-2/3 mx-auto"></div>
+                            
+                            <p class="text-[11px] text-slate-900 uppercase font-bold tracking-wider leading-tight">
+                                MUSJIDNOORLUMUBEEN BANSOMDEJTHONBUREE<br/>
+                                1134 SOI ISSARAPAB 9 ISSARAPAB ROAD<br/>
+                                BANGKOK 10600 THAILAND
+                            </p>
+                        </div>
+
+                        <!-- Receipt Title -->
+                        <div class="text-center mb-8 relative z-10">
+                            <span class="inline-block px-10 py-3 border-2 border-slate-900 bg-[#e6ffed] font-black text-2xl text-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]" style="-webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                                ใบเสร็จรับเงิน
+                            </span>
+                        </div>
+
+                        <!-- Date -->
+                        <div class="flex justify-end mb-6 text-slate-900 font-bold text-sm">
+                            <div class="flex items-end">
+                                <span class="mr-2">วันที่</span>
+                                <span class="border-b border-dotted border-slate-800 inline-block w-48 text-center text-base">
+                                    {{ donationResult?.date ? new Date(donationResult.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Form Fields -->
+                        <div class="space-y-6 text-slate-900 font-bold text-base">
+                            <div class="flex items-end">
+                                <span class="w-32 whitespace-nowrap">ได้รับเงินจาก</span>
+                                <span class="flex-1 border-b border-dotted border-slate-800 text-center px-4 text-lg">{{ donationResult?.donorName || 'ผู้ไม่ประสงค์ออกนาม' }}</span>
+                            </div>
+                            <div class="flex items-end">
+                                <span class="w-32 whitespace-nowrap">ที่อยู่</span>
+                                <span class="flex-1 border-b border-dotted border-slate-800 text-center px-4 text-base text-slate-700 font-medium">{{ donationResult?.address || '-' }}</span>
+                            </div>
+                            <div class="flex flex-col gap-3">
+                                <div class="flex items-end">
+                                    <span class="w-32 whitespace-nowrap">จำนวนเงิน</span>
+                                    <span class="flex-1 border-b border-dotted border-slate-800 px-4 text-xl font-black text-center">
+                                        {{ donationResult?.amount?.toLocaleString() }}
+                                    </span>
+                                    <span class="w-16 text-right">บาท</span>
+                                </div>
+                                <div class="flex items-end">
+                                    <span class="w-32 whitespace-nowrap"></span>
+                                    <span class="flex-1 border-b border-dotted border-slate-800 px-4 text-center text-sm text-slate-700 font-bold">
+                                        ({{ bahtText(donationResult?.amount) }})
+                                    </span>
+                                    <span class="w-16 text-right"></span>
+                                </div>
+                            </div>
+                            <div class="flex items-end">
+                                <span class="w-32 whitespace-nowrap">เพื่อ</span>
+                                <span class="flex-1 border-b border-dotted border-slate-800 text-center px-4 text-lg">{{ donationResult?.blessing || 'บำรุงมัสยิด' }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Thanks Message -->
+                        <div class="mt-10 mb-12 text-center text-slate-800 text-sm leading-loose px-8">
+                            "ทางคณะกรรมการมัสยิดได้รับไว้ด้วยความขอบคุณยิ่ง ขอเอกองค์อัลเลาะห์ (ซ.บ.)<br/>
+                            ได้โปรดประทานพรให้ท่านและครอบครัว จงประสบแต่ความสุข ความเจริญ<br/>
+                            และสัมฤทธิ์ผลในสิ่งอันพึงปรารถนาทุกประการเทอญ"
+                        </div>
+
+                        <!-- Signatures -->
+                        <div class="flex justify-between px-12 text-slate-900 font-bold text-base mt-16">
+                            <div class="text-center">
+                                <div class="w-48 border-b border-dotted border-slate-800 mb-2"></div>
+                                <p>เหรัญญิก</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-48 border-b border-dotted border-slate-800 mb-2"></div>
+                                <p>ผู้รับเงิน</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="p-6 md:p-8 text-center mt-6 md:mt-0">
-                        <div class="w-16 h-16 md:w-20 md:h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center text-3xl md:text-4xl mx-auto mb-4 print:hidden">
+                    <div class="p-6 md:p-8 text-center mt-6 md:mt-0 print:hidden">
+                        <div class="w-16 h-16 md:w-20 md:h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center text-3xl md:text-4xl mx-auto mb-4">
                             🎉
                         </div>
                         
-                        <h3 class="text-xl md:text-2xl font-black text-slate-800 mb-1 print:text-xl">บริจาคสำเร็จ!</h3>
-                        <p class="text-sm md:text-base text-slate-500 font-medium mb-6 print:mb-4">ขออัลลอฮ์ทรงตอบแทนความดีงามแก่ท่าน</p>
+                        <h3 class="text-xl md:text-2xl font-black text-slate-800 mb-1">บริจาคสำเร็จ!</h3>
+                        <p class="text-sm md:text-base text-slate-500 font-medium mb-6">ขออัลลอฮ์ทรงตอบแทนความดีงามแก่ท่าน</p>
 
                         <!-- ดีเทลรายการสรุปยอดบิลบริจาค -->
-                        <div class="bg-slate-50 rounded-[2rem] p-6 mb-8 text-left space-y-3 border border-slate-100 print:bg-white print:border-none print:p-0">
-                            <div class="flex justify-between items-center border-b border-slate-200 pb-3 mb-3 print:border-slate-100">
+                        <div class="bg-slate-50 rounded-[2rem] p-6 mb-8 text-left space-y-3 border border-slate-100">
+                            <div class="flex justify-between items-center border-b border-slate-200 pb-3 mb-3">
                                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">เลขที่อ้างอิง</span>
-                                <span class="text-sm font-bold text-slate-700 font-mono">#{{ donationResult?.id?.toString().padStart(6, '0') }}</span>
+                                <span class="text-sm font-bold text-slate-700 font-mono">#{{ donationResult?.id?.toString().padStart(6, '0') || '----' }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-xs font-bold text-slate-400">ชื่อผู้บริจาค:</span>
@@ -416,15 +505,15 @@ const bahtText = (amount) => {
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-xs font-bold text-slate-400">วันที่:</span>
-                                <span class="text-sm font-bold text-slate-700">{{ new Date(donationResult?.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) }}</span>
+                                <span class="text-sm font-bold text-slate-700">{{ donationResult?.date ? new Date(donationResult.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' }}</span>
                             </div>
-                            <div v-if="donationResult?.taxId" class="flex justify-between pt-3 border-t border-dashed border-slate-200 print:border-slate-100">
+                            <div v-if="donationResult?.taxId" class="flex justify-between pt-3 border-t border-dashed border-slate-200">
                                 <span class="text-xs font-bold text-slate-400">เลขผู้เสียภาษี:</span>
                                 <span class="text-sm font-bold text-slate-700">{{ donationResult?.taxId }}</span>
                             </div>
                             
                             <!-- แนบภาพสลิปประกอบบิลเพื่อใช้อ้างอิงการตรวจสอบ -->
-                            <div class="pt-4 border-t border-slate-200 print:border-slate-100 mt-4">
+                            <div class="pt-4 border-t border-slate-200 mt-4">
                                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">หลักฐานการโอนเงิน</p>
                                 <div class="w-full h-40 bg-white rounded-xl overflow-hidden border border-slate-200">
                                     <img :src="donationResult?.slipUrl" class="w-full h-full object-contain" alt="สลิปการโอนเงิน" />
@@ -433,23 +522,19 @@ const bahtText = (amount) => {
                         </div>
 
                         <!-- กลุ่มควบคุมในหน้าจอเว็บ (ซ่อนไม่ให้พิมพ์ออกมาบนกระดาษ) -->
-                        <div class="flex flex-col gap-3 print:hidden">
+                        <div class="flex flex-col gap-3">
                             <button @click="printReceipt" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
                                 <span>🖨️</span> พิมพ์ใบเสร็จ / บันทึกเป็น PDF
                             </button>
                             <button v-if="donationResult?.taxId" @click="printTaxInvoice" class="w-full py-4 bg-amber-500 text-white font-black rounded-2xl shadow-xl hover:bg-amber-600 transition-all flex items-center justify-center gap-2">
                                 <span>📑</span> พิมพ์ใบกำกับภาษี (ชั่วคราว)
                             </button>
-                            <div class="text-red-500 text-sm font-bold">* หมายเหตุ: ใบกำกับภาษีฉบับจริงจะถูกจัดส่งทางไปรษณีย์ภายใน 7-14 วันทำการ</div>
+
                             <button @click="showSuccessModal = false" class="w-full py-4 bg-emerald-50 text-emerald-600 font-bold rounded-2xl hover:bg-emerald-100 transition-all">
                                 กลับสู่หน้าหลัก
                             </button>
                         </div>
 
-                        <!-- คำลงท้ายบิลที่พิมพ์ -->
-                        <div class="hidden print:block mt-12 text-center text-[10px] text-slate-400 italic">
-                            * เอกสารนี้เป็นเพียงหลักฐานการแจ้งบริจาคเบื้องต้น *
-                        </div>
                     </div>
                 </div>
             </div>

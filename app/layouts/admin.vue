@@ -88,7 +88,7 @@
     ></div>
 
     <!-- ==================== 3. Main Content (ส่วนแสดงเนื้อหาฟังก์ชั่นหลักหลังบ้าน) ==================== -->
-    <main class="flex-1 flex flex-col min-w-0 h-screen print:h-auto overflow-hidden print:overflow-visible pt-16 lg:pt-0">
+    <main class="flex-1 flex flex-col min-w-0 h-screen print:h-auto overflow-hidden print:overflow-visible pt-16 lg:pt-0 print:pt-0">
       
       <!-- แถบหัวข้อย่อยด้านบนของแต่ละหน้าของหลังบ้าน (แสดงเฉพาะจอคอม) -->
       <header class="hidden lg:flex h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 items-center justify-between sticky top-0 z-10 print:hidden">
@@ -102,10 +102,10 @@
       </header>
 
       <!-- พื้นที่คอยเรนเดอร์เนื้อหาจากหน้านั้นๆ (Slot Area) -->
-      <div class="flex-1 overflow-y-auto p-4 md:p-10 bg-slate-50">
-        <div class="max-w-6xl mx-auto">
+      <div class="flex-1 overflow-y-auto p-4 md:p-10 bg-slate-50 print:p-0 print:bg-white print:overflow-visible">
+        <div class="max-w-6xl mx-auto print:max-w-none">
           <!-- แสดงหัวชื่อหน้าเฉพาะบนอุปกรณ์มือถือ -->
-          <div class="lg:hidden mb-6">
+          <div class="lg:hidden mb-6 print:hidden">
             <h2 class="text-2xl font-black text-slate-800 tracking-tight">{{ pageTitle }}</h2>
             <div class="w-10 h-1 bg-emerald-500 mt-2 rounded-full"></div>
           </div>

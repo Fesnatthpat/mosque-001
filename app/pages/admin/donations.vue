@@ -129,62 +129,101 @@
       </div>
 
       <!-- ==================== 4. Print Template for Tax Invoice (แสดงเฉพาะตอนพิมพ์) ==================== -->
-      <div class="hidden print:block w-full max-w-lg mx-auto mt-10 font-['Prompt']">
-        <!-- ส่วนหัวที่จะแสดงเฉพาะเวลาที่กดสั่งพิมพ์กระดาษออกมาเท่านั้น (Hidden in Web View, Visible in Printing) -->
-        <div class="p-8 text-center border-b-2 border-emerald-500">
-            <h1 class="text-2xl font-black text-emerald-700 uppercase">ใบกำกับภาษี / ใบเสร็จรับเงิน</h1>
-            <p class="text-sm font-bold text-slate-500">มัสยิดนูรุ้ลมู่บิน</p>
-        </div>
+      <div class="hidden print:block w-full max-w-3xl mx-auto mt-4 font-['Prompt'] bg-[#ffcce6] p-10 border-2 border-slate-800 relative" style="-webkit-print-color-adjust: exact; print-color-adjust: exact;">
+          <!-- Corner decorations -->
+          <div class="absolute top-2 left-2 w-12 h-12 border-t-2 border-l-2 border-slate-800 rounded-tl-2xl"></div>
+          <div class="absolute top-2 right-2 w-12 h-12 border-t-2 border-r-2 border-slate-800 rounded-tr-2xl"></div>
+          <div class="absolute bottom-2 left-2 w-12 h-12 border-b-2 border-l-2 border-slate-800 rounded-bl-2xl"></div>
+          <div class="absolute bottom-2 right-2 w-12 h-12 border-b-2 border-r-2 border-slate-800 rounded-br-2xl"></div>
 
-        <div class="p-6 md:p-8 text-center" v-if="selectedInvoice">
-            <h3 class="text-xl md:text-2xl font-black text-slate-800 mb-1">หลักฐานการรับเงิน</h3>
-            <p class="text-sm md:text-base text-slate-500 font-medium mb-6">ขออัลลอฮ์ทรงตอบแทนความดีงามแก่ท่าน</p>
+          <div class="flex justify-end items-start text-slate-900 font-bold text-sm mb-4">
+              <div class="flex items-end">
+                  <span class="mr-2">เลขที่</span>
+                  <span class="border-b border-dotted border-slate-800 inline-block w-32 text-center text-lg font-mono">{{ selectedInvoice?.id?.toString().padStart(4, '0') }}</span>
+              </div>
+          </div>
 
-            <!-- ดีเทลรายการสรุปยอดบิลบริจาค -->
-            <div class="bg-white text-left space-y-3">
-                <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">เลขที่อ้างอิง</span>
-                    <span class="text-sm font-bold text-slate-700 font-mono">#{{ selectedInvoice.id.toString().padStart(6, '0').slice(0, 8).toUpperCase() }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-xs font-bold text-slate-400">ชื่อผู้บริจาค:</span>
-                    <span class="text-sm font-bold text-slate-700">{{ selectedInvoice.donorName || 'ผู้ไม่ประสงค์ออกนาม' }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-bold text-slate-400">จำนวนเงิน:</span>
-                    <div class="text-right">
-                      <span class="text-lg font-black text-emerald-600">{{ selectedInvoice.amount.toLocaleString() }} บาท</span>
-                      <p class="text-[10px] text-emerald-600/80 font-bold mt-0.5">({{ bahtText(selectedInvoice.amount) }})</p>
-                    </div>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-xs font-bold text-slate-400">วันที่:</span>
-                    <span class="text-sm font-bold text-slate-700">{{ new Date(selectedInvoice.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) }}</span>
-                </div>
-                <div v-if="selectedInvoice.taxId" class="flex justify-between pt-3 border-t border-dashed border-slate-100">
-                    <span class="text-xs font-bold text-slate-400">เลขผู้เสียภาษี:</span>
-                    <span class="text-sm font-bold text-slate-700">{{ selectedInvoice.taxId }}</span>
-                </div>
-                <div v-if="selectedInvoice.address" class="flex justify-between pt-1">
-                    <span class="text-xs font-bold text-slate-400 w-1/3">ที่อยู่:</span>
-                    <span class="text-sm font-bold text-slate-700 text-right w-2/3">{{ selectedInvoice.address }}</span>
-                </div>
-                
-                <!-- แนบภาพสลิปประกอบบิลเพื่อใช้อ้างอิงการตรวจสอบ -->
-                <div class="pt-4 border-t border-slate-100 mt-4">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">หลักฐานการโอนเงิน</p>
-                    <div class="w-full h-48 bg-white rounded-xl overflow-hidden border border-slate-200">
-                        <img :src="selectedInvoice.slipUrl" class="w-full h-full object-contain" alt="สลิปการโอนเงิน" />
-                    </div>
-                </div>
-            </div>
+          <!-- Logo and Header -->
+          <div class="text-center mt-2 mb-8 relative">
+              <h1 class="text-4xl font-black text-slate-900 mb-2" style="font-family: serif; letter-spacing: 1px;">มัสยิดนูรุ้ลมูบีน</h1>
+              <p class="text-sm text-slate-900 font-medium">1134 ซอยอิสรภาพ 9 ถนนอิสรภาพ<br/>เขตธนบุรี กรุงเทพมหานคร 10600</p>
+              
+              <div class="my-3 border-b-2 border-slate-800 w-2/3 mx-auto"></div>
+              
+              <p class="text-[11px] text-slate-900 uppercase font-bold tracking-wider leading-tight">
+                  MUSJIDNOORLUMUBEEN BANSOMDEJTHONBUREE<br/>
+                  1134 SOI ISSARAPAB 9 ISSARAPAB ROAD<br/>
+                  BANGKOK 10600 THAILAND
+              </p>
+          </div>
 
-            <!-- คำลงท้ายบิลที่พิมพ์ -->
-            <div class="mt-12 text-center text-[10px] text-slate-400 italic leading-relaxed">
-                * เอกสารนี้เป็นเพียงหลักฐานการแจ้งบริจาคเบื้องต้น *<br/>
-                <span class="font-bold text-red-500">* หมายเหตุ: ใบกำกับภาษีฉบับจริงจะถูกจัดส่งทางไปรษณีย์ภายใน 7-14 วันทำการ</span>
-            </div>
-        </div>
+          <!-- Receipt Title -->
+          <div class="text-center mb-8 relative z-10">
+              <span class="inline-block px-10 py-3 border-2 border-slate-900 bg-[#e6ffed] font-black text-2xl text-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]" style="-webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                  ใบเสร็จรับเงิน
+              </span>
+          </div>
+
+          <!-- Date -->
+          <div class="flex justify-end mb-6 text-slate-900 font-bold text-sm">
+              <div class="flex items-end">
+                  <span class="mr-2">วันที่</span>
+                  <span class="border-b border-dotted border-slate-800 inline-block w-48 text-center text-base">
+                      {{ selectedInvoice ? new Date(selectedInvoice.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '' }}
+                  </span>
+              </div>
+          </div>
+
+          <!-- Form Fields -->
+          <div class="space-y-6 text-slate-900 font-bold text-base">
+              <div class="flex items-end">
+                  <span class="w-32 whitespace-nowrap">ได้รับเงินจาก</span>
+                  <span class="flex-1 border-b border-dotted border-slate-800 text-center px-4 text-lg">{{ selectedInvoice?.donorName || 'ผู้ไม่ประสงค์ออกนาม' }}</span>
+              </div>
+              <div class="flex items-end">
+                  <span class="w-32 whitespace-nowrap">ที่อยู่</span>
+                  <span class="flex-1 border-b border-dotted border-slate-800 text-center px-4 text-base text-slate-700 font-medium">{{ selectedInvoice?.address || '-' }}</span>
+              </div>
+              <div class="flex flex-col gap-3">
+                  <div class="flex items-end">
+                      <span class="w-32 whitespace-nowrap">จำนวนเงิน</span>
+                      <span class="flex-1 border-b border-dotted border-slate-800 px-4 text-xl font-black text-center">
+                          {{ selectedInvoice?.amount?.toLocaleString() }}
+                      </span>
+                      <span class="w-16 text-right">บาท</span>
+                  </div>
+                  <div class="flex items-end">
+                      <span class="w-32 whitespace-nowrap"></span>
+                      <span class="flex-1 border-b border-dotted border-slate-800 px-4 text-center text-sm text-slate-700 font-bold">
+                          ({{ bahtText(selectedInvoice?.amount) }})
+                      </span>
+                      <span class="w-16 text-right"></span>
+                  </div>
+              </div>
+              <div class="flex items-end">
+                  <span class="w-32 whitespace-nowrap">เพื่อ</span>
+                  <span class="flex-1 border-b border-dotted border-slate-800 text-center px-4 text-lg">{{ selectedInvoice?.blessing || 'บำรุงมัสยิด' }}</span>
+              </div>
+          </div>
+
+          <!-- Thanks Message -->
+          <div class="mt-10 mb-12 text-center text-slate-800 text-sm leading-loose px-8">
+              "ทางคณะกรรมการมัสยิดได้รับไว้ด้วยความขอบคุณยิ่ง ขอเอกองค์อัลเลาะห์ (ซ.บ.)<br/>
+              ได้โปรดประทานพรให้ท่านและครอบครัว จงประสบแต่ความสุข ความเจริญ<br/>
+              และสัมฤทธิ์ผลในสิ่งอันพึงปรารถนาทุกประการเทอญ"
+          </div>
+
+          <!-- Signatures -->
+          <div class="flex justify-between px-12 text-slate-900 font-bold text-base mt-16">
+              <div class="text-center">
+                  <div class="w-48 border-b border-dotted border-slate-800 mb-2"></div>
+                  <p>เหรัญญิก</p>
+              </div>
+              <div class="text-center">
+                  <div class="w-48 border-b border-dotted border-slate-800 mb-2"></div>
+                  <p>ผู้รับเงิน</p>
+              </div>
+          </div>
       </div>
 
     </NuxtLayout>

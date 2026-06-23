@@ -21,7 +21,7 @@ const footerLogo = computed(() => settings.value?.logo_url || '')
     <footer class="bg-[#104b2e] text-white pt-14 pb-6 mt-auto border-t-[6px] border-[#d6a848] font-['Prompt']">
         <div class="max-w-7xl mx-auto px-6 md:px-10">
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
                 
                 <!-- ==================== คอลัมน์ที่ 1: โลโก้ ชื่อ และคำขวัญ ==================== -->
                 <div class="space-y-5">
@@ -79,6 +79,14 @@ const footerLogo = computed(() => settings.value?.logo_url || '')
                             <span>{{ settings?.email || 'contact@mosque.com' }}</span>
                         </li>
                     </ul>
+                </div>
+
+                <!-- ==================== คอลัมน์ที่ 4: แผนที่ (Google Maps) ==================== -->
+                <div class="w-full h-full flex flex-col">
+                    <h3 class="text-[#facc15] font-bold text-lg mb-6 border-l-4 border-[#facc15] pl-3">แผนที่</h3>
+                    <div class="rounded-2xl overflow-hidden shadow-lg border-2 border-white/10 relative flex-1 min-h-[160px] w-full">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3875.8028994157985!2d100.48854281106362!3d13.730379797732702!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e298fbf73f4667%3A0x5a7864e59db77662!2z4Lih4Lix4Liq4Lii4Li04LiU4LiZ4Li54Lij4Li44LmJ4Lil4Lih4Li54LmI4Lia4Li14LiZ!5e0!3m2!1sth!2sth!4v1782117300933!5m2!1sth!2sth" class="absolute top-0 left-0 w-full h-full" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
                 </div>
             </div>
 
