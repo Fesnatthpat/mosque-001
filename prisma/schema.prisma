@@ -11,8 +11,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  // url      = env("DATABASE_URL") // ใช้ตัวแปร DATABASE_URL จาก .env สำหรับติดต่อ DB
+  provider  = "postgresql"
 }
 
 /// ตารางสำหรับจัดเก็บยอดเงินบริจาคและหลักฐาน (Donation Database Model)

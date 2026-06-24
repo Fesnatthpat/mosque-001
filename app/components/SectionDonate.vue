@@ -135,6 +135,14 @@ const bahtText = (amount: number) => {
   }
   return result + 'บาทถ้วน'
 }
+
+watch(() => form.value.purpose, (newPurpose) => {
+    if (!newPurpose || newPurpose.includes('ไม่รับ')) {
+        form.value.requestTaxInvoice = false
+        form.value.taxId = ''
+        form.value.address = ''
+    }
+})
 </script>
 
 <template>
@@ -187,10 +195,10 @@ const bahtText = (amount: number) => {
                             </div>
                         </div>
 
-                        <div class="space-y-2">
+                        <!-- <div class="space-y-2">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">คำอวยพร / ข้อความ</label>
                             <textarea v-model="form.blessing" rows="3" placeholder="ข้อความถึงมัสยิด..." class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500/20 outline-none font-medium"></textarea>
-                        </div>
+                        </div> -->
 
                         <div class="space-y-4" v-if="pageData.purposes && pageData.purposes.length > 0">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">วัตถุประสงค์การบริจาค (เลือกได้เพียง 1 ข้อ)</label>
@@ -202,7 +210,7 @@ const bahtText = (amount: number) => {
                             </div>
                         </div>
 
-                        <div class="space-y-4">
+                        <div v-if="form.purpose && !form.purpose.includes('ไม่รับ')" class="space-y-4">
                             <button 
                                 type="button"
                                 @click="showTaxModal = true"
@@ -288,6 +296,7 @@ const bahtText = (amount: number) => {
                             <div>
                                 <h4 class="text-2xl font-black text-slate-800">ข้อมูลใบกำกับภาษี</h4>
                                 <p class="text-sm text-slate-400 font-medium">กรุณากรอกข้อมูลให้ครบถ้วนเพื่อความถูกต้อง</p>
+                                <p class="text-xs text-rose-500 font-bold mt-1.5">*หมายเหตุ: ใบเสร็จรับเงิน / ใบกำกับภาษีฉบับจริงจะถูกจัดส่งทางไปรษณีย์ภายใน 7-14 วันทำการ</p>
                             </div>
                             <button @click="showTaxModal = false" class="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-100 transition-all">✕</button>
                         </div>

@@ -44,7 +44,7 @@
 
                     <!-- สถานะการขอใบกำกับภาษี -->
                     <div class="mt-3 flex flex-col items-start gap-2">
-                      <span v-if="donation.taxId" class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-md text-[10px] font-bold">
+                      <span v-if="donation.taxId || (donation.purpose && !donation.purpose.includes('ไม่รับ'))" class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-md text-[10px] font-bold">
                         <span>📑</span> ขอใบกำกับภาษี
                       </span>
                       <span v-else class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 text-slate-400 border border-slate-200 rounded-md text-[10px] font-bold">
@@ -118,7 +118,7 @@
                       ยกเลิก
                     </button>
                     <!-- ปุ่มพิมพ์ใบกำกับภาษี -->
-                    <button v-if="donation.taxId" @click="printInvoice(donation)"
+                    <button v-if="donation.taxId || (donation.purpose && !donation.purpose.includes('ไม่รับ'))" @click="printInvoice(donation)"
                       class="px-4 py-2 bg-amber-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/10 active:scale-95 flex items-center gap-1.5 ml-2">
                       <span>🖨️</span> พิมพ์
                     </button>
