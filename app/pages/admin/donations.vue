@@ -61,6 +61,16 @@
                     <!-- คำอวยพร/คำดุอาอ์จากผู้ร่วมทำบุญ -->
                     <p class="text-[11px] text-slate-400 mt-2 italic leading-relaxed max-w-[200px] truncate"
                       :title="donation.blessing">{{ donation.blessing || 'ไม่มีคำอวยพร' }}</p>
+
+                    <!-- วัตถุประสงค์การบริจาค -->
+                    <div class="mt-3 bg-slate-50 border border-slate-100 p-2 rounded-lg" v-if="donation.purpose">
+                      <p class="text-[10px] text-slate-500 font-bold mb-1">วัตถุประสงค์:</p>
+                      <p class="text-[11px] text-emerald-600 font-black">{{ donation.purpose }}</p>
+                      <button @click="openEditPurposeModal(donation)" class="mt-2 text-[10px] bg-white border border-slate-200 shadow-sm px-2 py-1 rounded text-slate-500 hover:bg-slate-100 transition-all font-bold">✏️ แก้ไข</button>
+                    </div>
+                    <div class="mt-3" v-else>
+                      <button @click="openEditPurposeModal(donation)" class="text-[10px] bg-slate-50 border border-slate-200 px-2 py-1 rounded text-slate-500 hover:bg-slate-100 transition-all font-bold">✏️ เพิ่มวัตถุประสงค์</button>
+                    </div>
                   </div>
                 </td>
 
@@ -202,7 +212,7 @@
               </div>
               <div class="flex items-end">
                   <span class="w-32 whitespace-nowrap">เพื่อ</span>
-                  <span class="flex-1 border-b border-dotted border-slate-800 text-center px-4 text-lg">{{ selectedInvoice?.blessing || 'บำรุงมัสยิด' }}</span>
+                  <span class="flex-1 border-b border-dotted border-slate-800 text-center px-4 text-lg">{{ selectedInvoice?.purpose || selectedInvoice?.blessing || 'บำรุงมัสยิด' }}</span>
               </div>
           </div>
 
@@ -249,6 +259,30 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- ==================== 6. Edit Purpose Modal ==================== -->
+    <Teleport to="body">
+      <div v-if="editPurposeModal.visible" class="fixed inset-0 z-[1000] flex items-center justify-center p-6">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="editPurposeModal.visible = false"></div>
+        <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl relative overflow-hidden z-10">
+          <div class="p-6 md:p-8">
+            <h4 class="text-xl font-black text-slate-800 mb-4">แก้ไขวัตถุประสงค์</h4>
+            
+            <div class="space-y-4 mb-6" v-if="availablePurposes.length > 0">
+               <label v-for="(purpose, idx) in availablePurposes" :key="idx" class="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                  <input type="radio" v-model="editPurposeModal.purpose" :value="purpose" name="editPurpose" class="w-4 h-4 text-emerald-500 border-slate-300 focus:ring-emerald-500" />
+                  <span class="text-sm font-bold text-slate-700">{{ purpose }}</span>
+               </label>
+            </div>
+
+            <div class="flex gap-3">
+               <button @click="editPurposeModal.visible = false" class="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all">ยกเลิก</button>
+               <button @click="savePurpose" class="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all">บันทึก</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -270,6 +304,10 @@ definePageMeta({
 
 // ดึงรายชื่อการบริจาคทั้งหมด
 const { data, refresh } = await useFetch('/api/admin/donations')
+
+// ดึงการตั้งค่าเว็บเพื่อนำตัวเลือกวัตถุประสงค์มาใช้งาน
+const { data: settings } = await useFetch('/api/settings')
+const availablePurposes = computed(() => settings.value?.page_donate?.purposes || ['ใช้ในลดหย่อนภาษี', 'บริจาคเพื่อการกุศล'])
 
 // === โครงสร้าง State คุมพรีวิวย่อสลิปลอยฟ้า (Floating Preview) ===
 const preview = ref({
@@ -364,5 +402,38 @@ function printInvoice(donation) {
   setTimeout(() => {
     window.print()
   }, 300)
+}
+
+// === ระบบแก้ไขวัตถุประสงค์ (Purpose) ===
+const editPurposeModal = ref({
+  visible: false,
+  donationId: 0,
+  purpose: ''
+})
+
+function openEditPurposeModal(donation) {
+  editPurposeModal.value = {
+    visible: true,
+    donationId: donation.id,
+    purpose: donation.purpose || ''
+  }
+}
+
+async function savePurpose() {
+  try {
+    const res = await $fetch('/api/admin/update-donation-purpose', {
+      method: 'POST',
+      body: { 
+        id: editPurposeModal.value.donationId, 
+        purpose: editPurposeModal.value.purpose
+      }
+    })
+    if (res.success) {
+      editPurposeModal.value.visible = false
+      await refresh()
+    }
+  } catch (error) {
+    alert('เกิดข้อผิดพลาด: ' + error.message)
+  }
 }
 </script>

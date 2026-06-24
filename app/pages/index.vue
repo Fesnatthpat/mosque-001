@@ -149,27 +149,12 @@ const setSlide = (index: number) => {
                 <button @click="setSlide(1)" :class="{'w-8 bg-[#facc15]': activeSlide === 1, 'w-3 bg-white/50 hover:bg-white/80': activeSlide !== 1}" class="h-3 rounded-full transition-all duration-300"></button>
             </div>
         </header>
-
-        <!-- ==================== 2. Brief History Section ==================== -->
-        <section v-if="pageData.history_brief" class="py-20 bg-white border-b border-slate-100">
-            <div class="max-w-4xl mx-auto px-6 text-center">
-                <div class="mb-10">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-4">ประวัติความเป็นมาโดยย่อ</h2>
-                    <div class="w-16 h-1 bg-[#facc15] mx-auto rounded-full"></div>
-                </div>
-                <p class="text-lg text-slate-600 leading-relaxed whitespace-pre-line mb-10">
-                    {{ pageData.history_brief }}
-                </p>
-                <NuxtLink to="/history" class="inline-flex items-center gap-2 px-8 py-3 bg-emerald-50 text-emerald-700 font-bold rounded-2xl hover:bg-emerald-100 transition-all active:scale-95 group">
-                    อ่านประวัติฉบับเต็ม
-                    <span class="group-hover:translate-x-1 transition-transform">→</span>
-                </NuxtLink>
-            </div>
-        </section>
+        <!-- ==================== 2. Sections from other pages ==================== -->
+        <SectionHistory />
 
         <!-- ==================== 3. Dynamic About Section ==================== -->
         <section id="about" class="max-w-7xl mx-auto px-5 py-24 text-center">
-            <div class="mb-12">
+            <div v-reveal class="mb-12">
                 <h2 class="text-4xl font-bold text-gray-800 mb-4">เกี่ยวกับมัสยิดของเรา</h2>
                 <div class="w-20 h-1.5 bg-green-700 mx-auto rounded-full"></div>
             </div>
@@ -178,6 +163,7 @@ const setSlide = (index: number) => {
                 <div 
                     v-for="(item, index) in pageData.about_items" 
                     :key="index"
+                    v-reveal
                     class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group border border-slate-100"
                 >
                     <div class="h-64 overflow-hidden relative">
@@ -203,6 +189,10 @@ const setSlide = (index: number) => {
                 <p>ขออภัย ขณะนี้ยังไม่มีข้อมูลรายละเอียดมัสยิด</p>
             </div>
         </section>
+
+        <SectionTimetable />
+        <SectionActivities />
+        <SectionDonate />
 
     </div>
 </template>

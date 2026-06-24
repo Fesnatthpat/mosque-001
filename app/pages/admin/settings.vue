@@ -346,6 +346,27 @@
                   </div>
                 </div>
               </div>
+              <!-- กล่องจัดการวัตถุประสงค์การบริจาค (Checkboxes Options) -->
+              <div class="space-y-4 pt-6 border-t border-slate-100">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">ตัวเลือกวัตถุประสงค์ (Checkboxes)</label>
+                    <p class="text-[10px] text-slate-500 font-medium">เพิ่มตัวเลือกให้ผู้บริจาคติ๊กเลือกวัตถุประสงค์</p>
+                  </div>
+                  <button @click="addDonatePurpose" class="px-4 py-1.5 bg-emerald-50 text-emerald-600 font-bold rounded-lg hover:bg-emerald-100 transition-all text-xs">➕ เพิ่มตัวเลือก</button>
+                </div>
+                
+                <div class="space-y-3">
+                  <div v-for="(purpose, idx) in pageData.donate.purposes" :key="idx" class="flex gap-2 items-center">
+                    <input v-model="pageData.donate.purposes[idx]" type="text" placeholder="ระบุวัตถุประสงค์..." class="flex-1 px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all outline-none font-bold text-sm shadow-inner" />
+                    <button @click="removeDonatePurpose(idx)" class="w-10 h-10 bg-white border border-slate-200 text-rose-500 rounded-xl hover:bg-rose-50 hover:border-rose-200 transition-all flex items-center justify-center shadow-sm">✕</button>
+                  </div>
+                  <div v-if="!pageData.donate.purposes?.length" class="p-4 border-2 border-dashed border-slate-200 rounded-xl text-center text-xs font-bold text-slate-400">
+                    ยังไม่มีตัวเลือก (หากว่างไว้ จะไม่มีให้ติ๊กเลือก)
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -497,7 +518,7 @@ const pageData = ref({
   navbar: { logo: '', icon: '', title: '' },
   index: { hero_title: '', hero_subtitle: '', hero_image: '', about_items: [] },
   history: { title: '', content_top: '', image: '', content_bottom: '', personnel: [] },
-  donate: { title: '', description: '', qr_image: '' },
+  donate: { title: '', description: '', qr_image: '', purposes: ['ใช้ในลดหย่อนภาษี', 'บริจาคเพื่อการกุศล'] },
   activities: { title: '', description: '', items: [] }
 })
 
@@ -549,6 +570,17 @@ function addActivity() {
 function removeActivity(index) {
   if (pageData.value.activities.items) {
     pageData.value.activities.items.splice(index, 1)
+  }
+}
+
+function addDonatePurpose() {
+  if (!pageData.value.donate.purposes) pageData.value.donate.purposes = []
+  pageData.value.donate.purposes.push('')
+}
+
+function removeDonatePurpose(index) {
+  if (pageData.value.donate.purposes) {
+    pageData.value.donate.purposes.splice(index, 1)
   }
 }
 

@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   try {
     // 1. อ่านข้อมูลของแบบฟอร์มที่มีการยิงแจ้งเข้ามาจากช่องทางหน้าเว็บ
     const body = await readBody(event)
-    const { amount, donorName, donorEmail, donorPhone, blessing, slipUrl, taxId, address } = body
+    const { amount, donorName, donorEmail, donorPhone, blessing, slipUrl, taxId, address, purpose } = body
 
     try {
       // 2. สั่งสร้างและจัดเก็บรายการบริจาคใหม่ในตาราง Donation ด้วย Prisma Client
@@ -26,6 +26,7 @@ export default defineEventHandler(async (event) => {
           slipUrl,
           taxId,
           address,
+          purpose,
           status: 'pending'          // กำหนดเป็น 'pending' เสมอเพื่อให้ฝั่งแอดมินตรวจก่อน
         }
       })

@@ -12,7 +12,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // ใช้ตัวแปร DATABASE_URL จาก .env สำหรับติดต่อ DB
+  // url      = env("DATABASE_URL") // ใช้ตัวแปร DATABASE_URL จาก .env สำหรับติดต่อ DB
 }
 
 /// ตารางสำหรับจัดเก็บยอดเงินบริจาคและหลักฐาน (Donation Database Model)
@@ -26,6 +26,7 @@ model Donation {
   slipUrl     String?                               // ลิงก์รูปหลักฐานสลิปโอนจาก Supabase (ค่าว่างได้)
   taxId       String?                               // เลขประจำตัวผู้เสียภาษี 13 หลัก (ค่าว่างได้)
   address     String?                               // ที่อยู่จัดส่งเอกสารใบอนุโมทนาบัตร (ค่าว่างได้)
+  purpose     String?                               // วัตถุประสงค์การบริจาค (เช่น ลดหย่อนภาษี, เพื่อการกุศล)
   date        DateTime @default(now())              // วันที่และเวลากดแจ้งบริจาค (ค่าตั้งต้นคือเวลาปัจจุบัน)
   status      String   @default("pending")          // สถานะตรวจสอบสลิป (ค่าตั้งต้นคือ pending = รอแอดมินยืนยัน)
 }

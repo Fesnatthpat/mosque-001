@@ -6,10 +6,61 @@
  * 2. แสดงรายการเมนูเชื่อมโยงไปยังหน้าย่อยต่างๆ (หน้าแรก, ประวัติ, ตารางละหมาด, กิจกรรม, บริจาค)
  * 3. รองรับปุ่มแฮมเบอร์เกอร์พับเก็บเมนูนำทางสวยงามเมื่อเปิดด้วยหน้าจอมือถือ/แท็บเล็ต (Responsive Hamburger Menu)
  */
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 // สเตตควบคุมการเปิด/ปิดเมนูสไลด์บาร์บนมือถือ
 const isMenuOpen = ref(false)
+const activeHash = ref('#top')
+
+const handleScroll = () => {
+    if (route.path !== '/') return
+    
+    const sections = ['history', 'about', 'timetable', 'activities', 'donate']
+    const scrollY = window.scrollY + 100 // Add offset for navbar
+
+    let current = '#top'
+    for (const id of sections) {
+        const el = document.getElementById(id)
+        if (el && el.offsetTop <= scrollY) {
+            current = '#' + id
+        }
+    }
+    activeHash.value = current
+}
+
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll)
+    if (import.meta.client) {
+        setTimeout(handleScroll, 100)
+    }
+})
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll)
+})
+
+const handleNavClick = (e, targetHash) => {
+    isMenuOpen.value = false
+    if (route.path === '/') {
+        e.preventDefault()
+        activeHash.value = targetHash
+        if (targetHash === '#top') {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            window.history.pushState(null, '', '/')
+            return
+        }
+        
+        const el = document.querySelector(targetHash)
+        if (el) {
+            const y = el.getBoundingClientRect().top + window.scrollY - 80
+            window.scrollTo({ top: y, behavior: 'smooth' })
+            window.history.pushState(null, '', targetHash)
+        }
+    }
+}
 
 // ดึงข้อมูลการตั้งค่าเว็บไซต์ (ชื่อและโลโก้หลัก) จาก API หลังบ้านแบบไม่ขัดขวางการเรนเดอร์ (Lazy Fetch)
 const { data: settings } = useLazyFetch('/api/settings')
@@ -46,29 +97,34 @@ const navbarIcon = computed(() => settings.value?.page_navbar?.icon || '')
             <!-- ==================== รายการเมนูสำหรับคอมพิวเตอร์ (Desktop Menu - ซ่อนบนจอเล็ก) ==================== -->
             <ul class="hidden lg:flex space-x-8 text-white font-medium whitespace-nowrap">
                 <li>
-                    <NuxtLink to="/"
-                        class="pb-1 border-b-2 border-transparent hover:text-[#facc15] hover:border-[#facc15] transition-colors duration-300 block"
-                        active-class="!text-[#facc15] !border-[#facc15]">หน้าแรก</NuxtLink>
+                    <NuxtLink to="/" @click="handleNavClick($event, '#top')"
+                        class="pb-1 border-b-2 transition-colors duration-300 block"
+                        :class="route.path === '/' && activeHash === '#top' ? 'text-[#facc15] border-[#facc15]' : 'border-transparent hover:text-[#facc15] hover:border-[#facc15]'">หน้าแรก</NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink to="/history"
-                        class="pb-1 border-b-2 border-transparent hover:text-[#facc15] hover:border-[#facc15] transition-colors duration-300 block"
-                        active-class="!text-[#facc15] !border-[#facc15]">ประวัติความเป็นมา</NuxtLink>
+                    <NuxtLink to="/#history" @click="handleNavClick($event, '#history')"
+                        class="pb-1 border-b-2 transition-colors duration-300 block"
+                        :class="route.path === '/' && activeHash === '#history' ? 'text-[#facc15] border-[#facc15]' : 'border-transparent hover:text-[#facc15] hover:border-[#facc15]'">ประวัติความเป็นมา</NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink to="/timetable"
-                        class="pb-1 border-b-2 border-transparent hover:text-[#facc15] hover:border-[#facc15] transition-colors duration-300 block"
-                        active-class="!text-[#facc15] !border-[#facc15]">ตารางเวลาละหมาด</NuxtLink>
+                    <NuxtLink to="/#about" @click="handleNavClick($event, '#about')"
+                        class="pb-1 border-b-2 transition-colors duration-300 block"
+                        :class="route.path === '/' && activeHash === '#about' ? 'text-[#facc15] border-[#facc15]' : 'border-transparent hover:text-[#facc15] hover:border-[#facc15]'">เกี่ยวกับมัสยิด</NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink to="/activities"
-                        class="pb-1 border-b-2 border-transparent hover:text-[#facc15] hover:border-[#facc15] transition-colors duration-300 block"
-                        active-class="!text-[#facc15] !border-[#facc15]">กิจกรรม</NuxtLink>
+                    <NuxtLink to="/#timetable" @click="handleNavClick($event, '#timetable')"
+                        class="pb-1 border-b-2 transition-colors duration-300 block"
+                        :class="route.path === '/' && activeHash === '#timetable' ? 'text-[#facc15] border-[#facc15]' : 'border-transparent hover:text-[#facc15] hover:border-[#facc15]'">ตารางเวลาละหมาด</NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink to="/donate"
-                        class="pb-1 border-b-2 border-transparent hover:text-[#facc15] hover:border-[#facc15] transition-colors duration-300 block"
-                        active-class="!text-[#facc15] !border-[#facc15]">ร่วมบริจาค</NuxtLink>
+                    <NuxtLink to="/#activities" @click="handleNavClick($event, '#activities')"
+                        class="pb-1 border-b-2 transition-colors duration-300 block"
+                        :class="route.path === '/' && activeHash === '#activities' ? 'text-[#facc15] border-[#facc15]' : 'border-transparent hover:text-[#facc15] hover:border-[#facc15]'">กิจกรรม</NuxtLink>
+                </li>
+                <li>
+                    <NuxtLink to="/#donate" @click="handleNavClick($event, '#donate')"
+                        class="pb-1 border-b-2 transition-colors duration-300 block"
+                        :class="route.path === '/' && activeHash === '#donate' ? 'text-[#facc15] border-[#facc15]' : 'border-transparent hover:text-[#facc15] hover:border-[#facc15]'">ร่วมบริจาค</NuxtLink>
                 </li>
             </ul>
 
@@ -92,37 +148,44 @@ const navbarIcon = computed(() => settings.value?.page_navbar?.icon || '')
                 class="lg:hidden bg-[#155d3a]/95 backdrop-blur-md border-t border-white/10 fixed top-[72px] left-0 w-full h-[calc(100vh-72px)] overflow-y-auto z-50">
                 <ul class="flex flex-col px-8 py-12 text-white font-medium space-y-8">
                     <li>
-                        <NuxtLink @click="isMenuOpen = false" to="/"
+                        <NuxtLink @click="handleNavClick($event, '#top')" to="/"
                             class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
-                            active-class="!text-[#facc15]">
+                            :class="route.path === '/' && activeHash === '#top' ? '!text-[#facc15]' : ''">
                             <span class="text-2xl">🏠</span> หน้าแรก
                         </NuxtLink>
                     </li>
                     <li>
-                        <NuxtLink @click="isMenuOpen = false" to="/history"
+                        <NuxtLink @click="handleNavClick($event, '#history')" to="/#history"
                             class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
-                            active-class="!text-[#facc15]">
+                            :class="route.path === '/' && activeHash === '#history' ? '!text-[#facc15]' : ''">
                             <span class="text-2xl">📖</span> ประวัติความเป็นมา
                         </NuxtLink>
                     </li>
                     <li>
-                        <NuxtLink @click="isMenuOpen = false" to="/timetable"
+                        <NuxtLink @click="handleNavClick($event, '#about')" to="/#about"
                             class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
-                            active-class="!text-[#facc15]">
+                            :class="route.path === '/' && activeHash === '#about' ? '!text-[#facc15]' : ''">
+                            <span class="text-2xl">🕌</span> เกี่ยวกับมัสยิด
+                        </NuxtLink>
+                    </li>
+                    <li>
+                        <NuxtLink @click="handleNavClick($event, '#timetable')" to="/#timetable"
+                            class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
+                            :class="route.path === '/' && activeHash === '#timetable' ? '!text-[#facc15]' : ''">
                             <span class="text-2xl">🕒</span> ตารางเวลาละหมาด
                         </NuxtLink>
                     </li>
                     <li>
-                        <NuxtLink @click="isMenuOpen = false" to="/activities"
+                        <NuxtLink @click="handleNavClick($event, '#activities')" to="/#activities"
                             class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
-                            active-class="!text-[#facc15]">
+                            :class="route.path === '/' && activeHash === '#activities' ? '!text-[#facc15]' : ''">
                             <span class="text-2xl">📅</span> กิจกรรม
                         </NuxtLink>
                     </li>
                     <li>
-                        <NuxtLink @click="isMenuOpen = false" to="/donate"
+                        <NuxtLink @click="handleNavClick($event, '#donate')" to="/#donate"
                             class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
-                            active-class="!text-[#facc15]">
+                            :class="route.path === '/' && activeHash === '#donate' ? '!text-[#facc15]' : ''">
                             <span class="text-2xl">🤝</span> ร่วมบริจาค
                         </NuxtLink>
                     </li>
