@@ -144,8 +144,7 @@
               <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
                 <th class="px-6 md:px-8 py-4">เวลา</th>
                 <th class="px-6 md:px-8 py-4">หน้าเพจ</th>
-                <th class="px-6 md:px-8 py-4">IP Address</th>
-                <th class="px-6 md:px-8 py-4 hidden sm:table-cell">Device Info</th>
+                
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-50 text-xs">
@@ -157,13 +156,6 @@
                 </td>
                 <td class="px-6 md:px-8 py-4">
                   <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[9px] font-bold tracking-wide">{{ visitor.path }}</span>
-                </td>
-                <td class="px-6 md:px-8 py-4 text-slate-500 font-mono text-[10px]">
-                  {{ visitor.ip || 'Unknown' }}
-                </td>
-                <!-- อุปกรณ์/เบราว์เซอร์ของผู้ใช้ ซ่อนบนหน้าจอมือถือขนาดเล็ก -->
-                <td class="px-6 md:px-8 py-4 text-[10px] text-slate-400 truncate max-w-[150px] lg:max-w-[300px] hidden sm:table-cell">
-                  {{ visitor.userAgent }}
                 </td>
               </tr>
               <!-- ป้ายเตือนในกรณีไม่มีประวัติการเข้าชม -->
