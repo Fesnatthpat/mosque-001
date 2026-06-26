@@ -9,7 +9,9 @@ const pageData = computed(() => settings.value?.page_donate || {
     title: 'ร่วมบริจาคสมทบทุน',
     description: 'การบริจาคของคุณจะถูกนำไปใช้เพื่อทำนุบำรุงมัสยิดและช่วยเหลือผู้ยากไร้ในชุมชน',
     qr_image: '/images/qr.png',
-    purposes: ['ใช้ในลดหย่อนภาษี', 'บริจาคเพื่อการกุศล']
+    purposes: ['ใช้ในลดหย่อนภาษี', 'บริจาคเพื่อการกุศล'],
+    bank_name: 'ชื่อบัญชี',
+    bank_account: 'มัสยิดบ้านสมเด็จ (เพื่อการกุศล)'
 })
 
 const form = ref({
@@ -32,6 +34,19 @@ const showSuccessModal = ref(false)
 const isPrintTaxMode = ref(false)
 const donationResult = ref<any>(null)
 const localSlipPreview = ref('')
+
+const isCopied = ref(false)
+function copyAccount() {
+    const textToCopy = pageData.value.bank_account || 'มัสยิดบ้านสมเด็จ (เพื่อการกุศล)'
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        isCopied.value = true
+        setTimeout(() => {
+            isCopied.value = false
+        }, 2000)
+    }).catch(err => {
+        console.error('Failed to copy: ', err)
+    })
+}
 
 async function handleSlipUpload(event: any) {
     const file = event.target.files[0]
@@ -167,10 +182,16 @@ watch(() => form.value.purpose, (newPurpose) => {
 
                     <div class="space-y-4 max-w-sm mx-auto">
                         <div class="bg-slate-900 p-5 rounded-2xl flex items-center justify-center gap-4 shadow-lg">
-                            <span class="text-3xl">🏦</span>
-                            <div class="text-left">
-                                <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">ชื่อบัญชี</p>
-                                <p class="font-bold text-white text-lg leading-tight">มัสยิดบ้านสมเด็จ (เพื่อการกุศล)</p>
+                            <span class="text-3xl shrink-0">🏦</span>
+                            <div class="text-left flex-1">
+                                <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">{{ pageData.bank_name || 'ชื่อบัญชี' }}</p>
+                                <div class="flex items-center justify-between gap-3 mt-0.5">
+                                    <p class="font-bold text-white text-lg leading-tight">{{ pageData.bank_account || 'มัสยิดบ้านสมเด็จ (เพื่อการกุศล)' }}</p>
+                                    <button @click="copyAccount" class="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center hover:bg-slate-700 active:scale-95 transition-all shrink-0" title="คัดลอก">
+                                        <svg v-if="isCopied" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
