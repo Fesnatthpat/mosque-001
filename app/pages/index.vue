@@ -111,7 +111,7 @@ const setSlide = (index: number) => {
                         <div class="text-3xl md:text-4xl font-bold text-[#facc15] tracking-wide drop-shadow-md mb-4">
                             {{ formattedAmount }} <span class="text-lg md:text-xl text-white font-normal">บาท</span>
                         </div>
-                        <NuxtLink to="/donate" class="bg-[#facc15] text-[#104b2e] px-6 py-2 rounded-full font-bold hover:bg-yellow-300 transition-colors inline-block">
+                        <NuxtLink to="#donate" class="bg-[#facc15] text-[#104b2e] px-6 py-2 rounded-full font-bold hover:bg-yellow-300 transition-colors inline-block">
                             ร่วมบริจาคออนไลน์
                         </NuxtLink>
                     </div>
