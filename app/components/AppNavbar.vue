@@ -106,11 +106,11 @@ const navbarIcon = computed(() => settings.value?.page_navbar?.icon || '')
                         class="pb-1 border-b-2 transition-colors duration-300 block"
                         :class="route.path === '/' && activeHash === '#history' ? 'text-[#facc15] border-[#facc15]' : 'border-transparent hover:text-[#facc15] hover:border-[#facc15]'">ประวัติความเป็นมา</NuxtLink>
                 </li>
-                <li>
+                <!-- <li>
                     <NuxtLink to="/#about" @click="handleNavClick($event, '#about')"
                         class="pb-1 border-b-2 transition-colors duration-300 block"
                         :class="route.path === '/' && activeHash === '#about' ? 'text-[#facc15] border-[#facc15]' : 'border-transparent hover:text-[#facc15] hover:border-[#facc15]'">เกี่ยวกับมัสยิด</NuxtLink>
-                </li>
+                </li> -->
                 <li>
                     <NuxtLink to="/#timetable" @click="handleNavClick($event, '#timetable')"
                         class="pb-1 border-b-2 transition-colors duration-300 block"
@@ -161,13 +161,13 @@ const navbarIcon = computed(() => settings.value?.page_navbar?.icon || '')
                             <span class="text-2xl">📖</span> ประวัติความเป็นมา
                         </NuxtLink>
                     </li>
-                    <li>
+                    <!-- <li>
                         <NuxtLink @click="handleNavClick($event, '#about')" to="/#about"
                             class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
                             :class="route.path === '/' && activeHash === '#about' ? '!text-[#facc15]' : ''">
                             <span class="text-2xl">🕌</span> เกี่ยวกับมัสยิด
                         </NuxtLink>
-                    </li>
+                    </li> -->
                     <li>
                         <NuxtLink @click="handleNavClick($event, '#timetable')" to="/#timetable"
                             class="flex items-center gap-4 py-4 text-xl border-b border-white/5 hover:text-[#facc15] transition-colors duration-300"
